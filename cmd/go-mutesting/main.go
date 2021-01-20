@@ -19,8 +19,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/jessevdk/go-flags"
-	"github.com/zimmski/go-tool/importing"
 	"github.com/zimmski/osutil"
 
 	"github.com/zimmski/go-mutesting"
