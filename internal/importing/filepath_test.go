@@ -2,6 +2,7 @@ package importing
 
 import (
 	"fmt"
+	"github.com/avito-tech/go-mutesting/internal/models"
 	"os"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func TestFilesOfArgs(t *testing.T) {
+	//TODO we need normal test with test folder
 	p := os.Getenv("GOPATH") + "/src/"
 
 	for _, test := range []struct {
@@ -31,38 +33,32 @@ func TestFilesOfArgs(t *testing.T) {
 			[]string{"filepath.go", "import.go"},
 		},
 		{
-			[]string{".."},
-			[]string{"../tool.go"},
-		},
-		{
 			[]string{"../importing"},
 			[]string{"../importing/filepath.go", "../importing/import.go"},
 		},
-		{
-			[]string{"../..."},
-			[]string{"../tool.go", "../importing/filepath.go", "../importing/import.go"},
-		},
 		// packages
 		{
-			[]string{"github.com/zimmski/go-tool"},
-			[]string{p + "github.com/zimmski/go-tool/tool.go"},
+			[]string{"github.com/avito-tech/go-mutesting/internal"},
+			[]string(nil),
 		},
 		{
-			[]string{"github.com/zimmski/go-tool/importing"},
-			[]string{p + "github.com/zimmski/go-tool/importing/filepath.go", p + "github.com/zimmski/go-tool/importing/import.go"},
+			[]string{"github.com/avito-tech/go-mutesting/internal/importing"},
+			[]string{p + "github.com/avito-tech/go-mutesting/internal/importing/filepath.go", p + "github.com/avito-tech/go-mutesting/internal/importing/import.go"},
 		},
 		{
-			[]string{"github.com/zimmski/go-tool/..."},
-			[]string{p + "github.com/zimmski/go-tool/tool.go", p + "github.com/zimmski/go-tool/importing/filepath.go", p + "github.com/zimmski/go-tool/importing/import.go"},
+			[]string{"github.com/avito-tech/go-mutesting/internal/importing/..."},
+			[]string{p + "github.com/avito-tech/go-mutesting/internal/importing/filepath.go", p + "github.com/avito-tech/go-mutesting/internal/importing/import.go"},
 		},
 	} {
-		got := FilesOfArgs(test.args)
+		var opts = &models.Options{}
+		got := FilesOfArgs(test.args, opts)
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
 }
 
 func TestPackagesWithFilesOfArgs(t *testing.T) {
+	//TODO we need normal test with test folder
 	p := os.Getenv("GOPATH") + "/src/"
 
 	for _, test := range []struct {
@@ -85,38 +81,23 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 			[]Package{Package{Name: ".", Files: []string{"filepath.go", "import.go"}}},
 		},
 		{
-			[]string{".."},
-			[]Package{Package{Name: "..", Files: []string{"../tool.go"}}},
-		},
-		{
 			[]string{"../importing"},
 			[]Package{Package{Name: "../importing", Files: []string{"../importing/filepath.go", "../importing/import.go"}}},
 		},
-		{
-			[]string{"../..."},
-			[]Package{
-				Package{Name: "..", Files: []string{"../tool.go"}},
-				Package{Name: "../importing", Files: []string{"../importing/filepath.go", "../importing/import.go"}},
-			},
-		},
 		// packages
 		{
-			[]string{"github.com/zimmski/go-tool"},
-			[]Package{Package{Name: p + "github.com/zimmski/go-tool", Files: []string{p + "github.com/zimmski/go-tool/tool.go"}}},
+			[]string{"github.com/avito-tech/go-mutesting/internal/importing"},
+			[]Package{Package{Name: p + "github.com/avito-tech/go-mutesting/internal/importing", Files: []string{p + "github.com/avito-tech/go-mutesting/internal/importing/filepath.go", p + "github.com/avito-tech/go-mutesting/internal/importing/import.go"}}},
 		},
 		{
-			[]string{"github.com/zimmski/go-tool/importing"},
-			[]Package{Package{Name: p + "github.com/zimmski/go-tool/importing", Files: []string{p + "github.com/zimmski/go-tool/importing/filepath.go", p + "github.com/zimmski/go-tool/importing/import.go"}}},
-		},
-		{
-			[]string{"github.com/zimmski/go-tool/..."},
+			[]string{"github.com/avito-tech/go-mutesting/internal/importing/..."},
 			[]Package{
-				Package{Name: p + "github.com/zimmski/go-tool", Files: []string{p + "github.com/zimmski/go-tool/tool.go"}},
-				Package{Name: p + "github.com/zimmski/go-tool/importing", Files: []string{p + "github.com/zimmski/go-tool/importing/filepath.go", p + "github.com/zimmski/go-tool/importing/import.go"}},
+				Package{Name: p + "github.com/avito-tech/go-mutesting/internal/importing", Files: []string{p + "github.com/avito-tech/go-mutesting/internal/importing/filepath.go", p + "github.com/avito-tech/go-mutesting/internal/importing/import.go"}},
 			},
 		},
 	} {
-		got := PackagesWithFilesOfArgs(test.args)
+		var opts = &models.Options{}
+		got := PackagesWithFilesOfArgs(test.args, opts)
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}

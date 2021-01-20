@@ -11,6 +11,7 @@ so TODO and FIXME. Heck I also give you a WORKAROUND.
 
 import (
 	"fmt"
+	"github.com/avito-tech/go-mutesting/internal/models"
 	"go/build"
 	"os"
 	"path"
@@ -19,7 +20,7 @@ import (
 	"strings"
 )
 
-func packagesWithFilesOfArgs(args []string) map[string]map[string]struct{} {
+func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map[string]struct{} {
 	var filenames []string
 
 	if len(args) == 0 {
@@ -44,6 +45,7 @@ func packagesWithFilesOfArgs(args []string) map[string]map[string]struct{} {
 
 	fileLookup := make(map[string]struct{})
 	pkgs := make(map[string]map[string]struct{})
+
 	for _, filename := range filenames {
 		if _, ok := fileLookup[filename]; ok {
 			continue
@@ -51,6 +53,18 @@ func packagesWithFilesOfArgs(args []string) map[string]map[string]struct{} {
 
 		if strings.HasSuffix(filename, "_test.go") { // ignore test files
 			continue
+		}
+
+		if opts.Config.SkipFileWithoutTest { // ignore files without tests
+			nameSize := len(filename)
+			if nameSize <= 3 {
+				continue
+			}
+
+			testName := filename[:nameSize-3] + "_test.go"
+			if !exists(testName) {
+				continue
+			}
 		}
 
 		if !exists(filename) {
@@ -76,8 +90,8 @@ func packagesWithFilesOfArgs(args []string) map[string]map[string]struct{} {
 }
 
 // FilesOfArgs returns all available Go files given a list of packages, directories and files which can embed patterns.
-func FilesOfArgs(args []string) []string {
-	pkgs := packagesWithFilesOfArgs(args)
+func FilesOfArgs(args []string, opts *models.Options) []string {
+	pkgs := packagesWithFilesOfArgs(args, opts)
 
 	pkgsNames := make([]string, 0, len(pkgs))
 	for name := range pkgs {
@@ -122,8 +136,8 @@ type PackagesByName struct{ Packages }
 func (p PackagesByName) Less(i, j int) bool { return p.Packages[i].Name < p.Packages[j].Name }
 
 // PackagesWithFilesOfArgs returns all available Go files sorted by their packages given a list of packages, directories and files which can embed patterns.
-func PackagesWithFilesOfArgs(args []string) []Package {
-	pkgs := packagesWithFilesOfArgs(args)
+func PackagesWithFilesOfArgs(args []string, opts *models.Options) []Package {
+	pkgs := packagesWithFilesOfArgs(args, opts)
 
 	r := make([]Package, 0, len(pkgs))
 	for name := range pkgs {

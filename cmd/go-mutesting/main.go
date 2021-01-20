@@ -141,7 +141,7 @@ func mainCmd(args []string) int {
 		return exitCode
 	}
 
-	files := importing.FilesOfArgs(opts.Remaining.Targets)
+	files := importing.FilesOfArgs(opts.Remaining.Targets, opts)
 	if len(files) == 0 {
 		return exitError("Could not find any suitable Go source files")
 	}
