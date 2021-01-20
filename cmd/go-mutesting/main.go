@@ -9,6 +9,7 @@ import (
 	"go/printer"
 	"go/token"
 	"go/types"
+	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
 	"os"
@@ -39,10 +40,11 @@ const (
 
 type options struct {
 	General struct {
-		Debug                bool `long:"debug" description:"Debug log output"`
-		DoNotRemoveTmpFolder bool `long:"do-not-remove-tmp-folder" description:"Do not remove the tmp folder where all mutations are saved to"`
-		Help                 bool `long:"help" description:"Show this help message"`
-		Verbose              bool `long:"verbose" description:"Verbose log output"`
+		Debug                bool   `long:"debug" description:"Debug log output"`
+		DoNotRemoveTmpFolder bool   `long:"do-not-remove-tmp-folder" description:"Do not remove the tmp folder where all mutations are saved to"`
+		Help                 bool   `long:"help" description:"Show this help message"`
+		Verbose              bool   `long:"verbose" description:"Verbose log output"`
+		Config               string `long:"config" description:"Path to config file"`
 	} `group:"General options"`
 
 	Files struct {
@@ -73,6 +75,11 @@ type options struct {
 	Remaining struct {
 		Targets []string `description:"Packages, directories and files even with patterns (by default the current directory)"`
 	} `positional-args:"true" required:"true"`
+
+	Config struct {
+		SkipFileWithoutTest  bool `yaml:"skip_without_test"`
+		SkipFileWithBuildTag bool `yaml:"skip_with_build_tags"`
+	}
 }
 
 func checkArguments(args []string, opts *options) (bool, int) {
@@ -109,6 +116,17 @@ func checkArguments(args []string, opts *options) (bool, int) {
 
 	if opts.General.Debug {
 		opts.General.Verbose = true
+	}
+
+	if opts.General.Config != "" {
+		yamlFile, err := ioutil.ReadFile(opts.General.Config)
+		if err != nil {
+			return true, exitError("Could not read config file: %q", opts.General.Config)
+		}
+		err = yaml.Unmarshal(yamlFile, &opts.Config)
+		if err != nil {
+			return true, exitError("Could not unmarshall config file: %q, %v", opts.General.Config, err)
+		}
 	}
 
 	return false, 0
