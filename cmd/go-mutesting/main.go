@@ -20,6 +20,7 @@ import (
 	"syscall"
 
 	"github.com/avito-tech/go-mutesting/internal/importing"
+	models "github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -38,51 +39,7 @@ const (
 	returnError
 )
 
-type options struct {
-	General struct {
-		Debug                bool   `long:"debug" description:"Debug log output"`
-		DoNotRemoveTmpFolder bool   `long:"do-not-remove-tmp-folder" description:"Do not remove the tmp folder where all mutations are saved to"`
-		Help                 bool   `long:"help" description:"Show this help message"`
-		Verbose              bool   `long:"verbose" description:"Verbose log output"`
-		Config               string `long:"config" description:"Path to config file"`
-	} `group:"General options"`
-
-	Files struct {
-		Blacklist []string `long:"blacklist" description:"List of MD5 checksums of mutations which should be ignored. Each checksum must end with a new line character."`
-		ListFiles bool     `long:"list-files" description:"List found files"`
-		PrintAST  bool     `long:"print-ast" description:"Print the ASTs of all given files and exit"`
-	} `group:"File options"`
-
-	Mutator struct {
-		DisableMutators []string `long:"disable" description:"Disable mutator by their name or using * as a suffix pattern"`
-		ListMutators    bool     `long:"list-mutators" description:"List all available mutators"`
-	} `group:"Mutator options"`
-
-	Filter struct {
-		Match string `long:"match" description:"Only functions are mutated that confirm to the arguments regex"`
-	} `group:"Filter options"`
-
-	Exec struct {
-		Exec    string `long:"exec" description:"Execute this command for every mutation (by default the built-in exec command is used)"`
-		NoExec  bool   `long:"no-exec" description:"Skip the built-in exec command and just generate the mutations"`
-		Timeout uint   `long:"exec-timeout" description:"Sets a timeout for the command execution (in seconds)" default:"10"`
-	} `group:"Exec options"`
-
-	Test struct {
-		Recursive bool `long:"test-recursive" description:"Defines if the executer should test recursively"`
-	} `group:"Test options"`
-
-	Remaining struct {
-		Targets []string `description:"Packages, directories and files even with patterns (by default the current directory)"`
-	} `positional-args:"true" required:"true"`
-
-	Config struct {
-		SkipFileWithoutTest  bool `yaml:"skip_without_test"`
-		SkipFileWithBuildTag bool `yaml:"skip_with_build_tags"`
-	}
-}
-
-func checkArguments(args []string, opts *options) (bool, int) {
+func checkArguments(args []string, opts *models.Options) (bool, int) {
 	p := flags.NewNamedParser("go-mutesting", flags.None)
 
 	p.ShortDescription = "Mutation testing for Go source code"
@@ -132,13 +89,13 @@ func checkArguments(args []string, opts *options) (bool, int) {
 	return false, 0
 }
 
-func debug(opts *options, format string, args ...interface{}) {
+func debug(opts *models.Options, format string, args ...interface{}) {
 	if opts.General.Debug {
 		fmt.Printf(format+"\n", args...)
 	}
 }
 
-func verbose(opts *options, format string, args ...interface{}) {
+func verbose(opts *models.Options, format string, args ...interface{}) {
 	if opts.General.Verbose || opts.General.Debug {
 		fmt.Printf(format+"\n", args...)
 	}
@@ -177,7 +134,7 @@ func (ms *mutationStats) Total() int {
 }
 
 func mainCmd(args []string) int {
-	var opts = &options{}
+	var opts = &models.Options{}
 	var mutationBlackList = map[string]struct{}{}
 
 	if exit, exitCode := checkArguments(args, opts); exit {
@@ -326,7 +283,7 @@ MUTATOR:
 	return returnOk
 }
 
-func mutate(opts *options, mutators []mutatorItem, mutationBlackList map[string]struct{}, mutationID int, pkg *types.Package, info *types.Info, file string, fset *token.FileSet, src ast.Node, node ast.Node, tmpFile string, execs []string, stats *mutationStats) int {
+func mutate(opts *models.Options, mutators []mutatorItem, mutationBlackList map[string]struct{}, mutationID int, pkg *types.Package, info *types.Info, file string, fset *token.FileSet, src ast.Node, node ast.Node, tmpFile string, execs []string, stats *mutationStats) int {
 	for _, m := range mutators {
 		debug(opts, "Mutator %s", m.Name)
 
@@ -389,7 +346,7 @@ func mutate(opts *options, mutators []mutatorItem, mutationBlackList map[string]
 	return mutationID
 }
 
-func mutateExec(opts *options, pkg *types.Package, file string, src ast.Node, mutationFile string, execs []string) (execExitCode int) {
+func mutateExec(opts *models.Options, pkg *types.Package, file string, src ast.Node, mutationFile string, execs []string) (execExitCode int) {
 	if len(execs) == 0 {
 		debug(opts, "Execute built-in exec command for mutation")
 
