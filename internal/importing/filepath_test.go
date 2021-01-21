@@ -66,7 +66,6 @@ func TestFilesOfArgs(t *testing.T) {
 }
 
 func TestPackagesWithFilesOfArgs(t *testing.T) {
-	//TODO we need normal test with test folder
 	p := os.Getenv("GOPATH") + "/src/"
 
 	for _, test := range []struct {
