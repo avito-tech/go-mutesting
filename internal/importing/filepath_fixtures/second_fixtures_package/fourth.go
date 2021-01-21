@@ -1,1 +1,0 @@
-package second_fixtures_package

@@ -1,5 +1,6 @@
 package models
 
+// Options Main config structure
 type Options struct {
 	General struct {
 		Debug                bool   `long:"debug" description:"Debug log output"`
