@@ -10,10 +10,10 @@ so TODO and FIXME. Heck I also give you a WORKAROUND.
 */
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"go/build"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -50,7 +50,7 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 	pkgs := make(map[string]map[string]struct{})
 	var re *regexp.Regexp
 	if opts.Config.SkipFileWithBuildTag {
-		re = regexp.MustCompile("\\+build")
+		re = regexp.MustCompile("\\+build (.*)(\\s+)package")
 	}
 
 	for _, filename := range filenames {
@@ -104,28 +104,12 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 }
 
 func regexpSearchInFile(file string, re *regexp.Regexp) bool {
-	f, err := os.Open(file)
+	contents, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		err := f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
 
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		if re.MatchString(scanner.Text()) {
-			return true
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	}
-
-	return false
+	return re.MatchString(string(contents))
 }
 
 // FilesOfArgs returns all available Go files given a list of packages, directories and files which can embed patterns.
@@ -227,7 +211,10 @@ func checkImportedPackage(pkg *build.Package, err error) []string {
 			// Don't complain if the failure is due to no Go source files.
 			return []string{}
 		}
-		fmt.Fprintln(os.Stderr, err)
+		_, err := fmt.Fprintln(os.Stderr, err)
+		if err != nil {
+			fmt.Println(err)
+		}
 
 		return []string{}
 	}
