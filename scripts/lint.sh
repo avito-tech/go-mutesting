@@ -19,8 +19,4 @@ echo "golint:"
 OUT=$(golint $PKG/... 2>&1 | grep --invert-match -E "(/example)")
 if [ -n "$OUT" ]; then echo "$OUT"; PROBLEM=1; fi
 
-echo "megacheck:"
-OUT=$(megacheck $PKG/... 2>&1 | grep --invert-match -E "(example/)")
-if [ -n "$OUT" ]; then echo "$OUT"; PROBLEM=1; fi
-
 if [ -n "$PROBLEM" ]; then exit 1; fi
