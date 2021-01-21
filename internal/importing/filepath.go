@@ -10,12 +10,15 @@ so TODO and FIXME. Heck I also give you a WORKAROUND.
 */
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"go/build"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -45,6 +48,10 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 
 	fileLookup := make(map[string]struct{})
 	pkgs := make(map[string]map[string]struct{})
+	var re *regexp.Regexp
+	if opts.Config.SkipFileWithBuildTag {
+		re = regexp.MustCompile("\\+build")
+	}
 
 	for _, filename := range filenames {
 		if _, ok := fileLookup[filename]; ok {
@@ -55,7 +62,7 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 			continue
 		}
 
-		if opts.Config.SkipFileWithoutTest { // ignore files without tests
+		if opts.Config.SkipFileWithoutTest || opts.Config.SkipFileWithBuildTag { // ignore files without tests
 			nameSize := len(filename)
 			if nameSize <= 3 {
 				continue
@@ -64,6 +71,13 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 			testName := filename[:nameSize-3] + "_test.go"
 			if !exists(testName) {
 				continue
+			}
+
+			if opts.Config.SkipFileWithBuildTag { // ignore files with test with build tags
+				isBuildTag := regexpSearchInFile(testName, re)
+				if isBuildTag {
+					continue
+				}
 			}
 		}
 
@@ -87,6 +101,26 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 	}
 
 	return pkgs
+}
+
+func regexpSearchInFile(file string, re *regexp.Regexp) bool {
+	f, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if re.MatchString(scanner.Text()) {
+			return true
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	return false
 }
 
 // FilesOfArgs returns all available Go files given a list of packages, directories and files which can embed patterns.
