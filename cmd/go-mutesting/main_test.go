@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(t *testing.T) {
+func TestMainSimple(t *testing.T) {
 	testMain(
 		t,
 		"../../example",
@@ -33,7 +33,7 @@ func TestMainFromOtherDirectory(t *testing.T) {
 	testMain(
 		t,
 		"../..",
-		[]string{"--debug", "--exec-timeout", "1", "github.com/zimmski/go-mutesting/example"},
+		[]string{"--debug", "--exec-timeout", "1", "github.com/avito-tech/go-mutesting/example"},
 		returnOk,
 		"The mutation score is 0.450000 (9 passed, 11 failed, 8 duplicated, 0 skipped, total is 20)",
 	)

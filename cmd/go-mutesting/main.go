@@ -9,6 +9,7 @@ import (
 	"go/printer"
 	"go/token"
 	"go/types"
+	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
 	"os"
@@ -18,16 +19,17 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/avito-tech/go-mutesting/internal/importing"
+	models "github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/jessevdk/go-flags"
-	"github.com/zimmski/go-tool/importing"
 	"github.com/zimmski/osutil"
 
-	"github.com/zimmski/go-mutesting"
-	"github.com/zimmski/go-mutesting/astutil"
-	"github.com/zimmski/go-mutesting/mutator"
-	_ "github.com/zimmski/go-mutesting/mutator/branch"
-	_ "github.com/zimmski/go-mutesting/mutator/expression"
-	_ "github.com/zimmski/go-mutesting/mutator/statement"
+	"github.com/avito-tech/go-mutesting"
+	"github.com/avito-tech/go-mutesting/astutil"
+	"github.com/avito-tech/go-mutesting/mutator"
+	_ "github.com/avito-tech/go-mutesting/mutator/branch"
+	_ "github.com/avito-tech/go-mutesting/mutator/expression"
+	_ "github.com/avito-tech/go-mutesting/mutator/statement"
 )
 
 const (
@@ -37,45 +39,7 @@ const (
 	returnError
 )
 
-type options struct {
-	General struct {
-		Debug                bool `long:"debug" description:"Debug log output"`
-		DoNotRemoveTmpFolder bool `long:"do-not-remove-tmp-folder" description:"Do not remove the tmp folder where all mutations are saved to"`
-		Help                 bool `long:"help" description:"Show this help message"`
-		Verbose              bool `long:"verbose" description:"Verbose log output"`
-	} `group:"General options"`
-
-	Files struct {
-		Blacklist []string `long:"blacklist" description:"List of MD5 checksums of mutations which should be ignored. Each checksum must end with a new line character."`
-		ListFiles bool     `long:"list-files" description:"List found files"`
-		PrintAST  bool     `long:"print-ast" description:"Print the ASTs of all given files and exit"`
-	} `group:"File options"`
-
-	Mutator struct {
-		DisableMutators []string `long:"disable" description:"Disable mutator by their name or using * as a suffix pattern"`
-		ListMutators    bool     `long:"list-mutators" description:"List all available mutators"`
-	} `group:"Mutator options"`
-
-	Filter struct {
-		Match string `long:"match" description:"Only functions are mutated that confirm to the arguments regex"`
-	} `group:"Filter options"`
-
-	Exec struct {
-		Exec    string `long:"exec" description:"Execute this command for every mutation (by default the built-in exec command is used)"`
-		NoExec  bool   `long:"no-exec" description:"Skip the built-in exec command and just generate the mutations"`
-		Timeout uint   `long:"exec-timeout" description:"Sets a timeout for the command execution (in seconds)" default:"10"`
-	} `group:"Exec options"`
-
-	Test struct {
-		Recursive bool `long:"test-recursive" description:"Defines if the executer should test recursively"`
-	} `group:"Test options"`
-
-	Remaining struct {
-		Targets []string `description:"Packages, directories and files even with patterns (by default the current directory)"`
-	} `positional-args:"true" required:"true"`
-}
-
-func checkArguments(args []string, opts *options) (bool, int) {
+func checkArguments(args []string, opts *models.Options) (bool, int) {
 	p := flags.NewNamedParser("go-mutesting", flags.None)
 
 	p.ShortDescription = "Mutation testing for Go source code"
@@ -111,16 +75,27 @@ func checkArguments(args []string, opts *options) (bool, int) {
 		opts.General.Verbose = true
 	}
 
+	if opts.General.Config != "" {
+		yamlFile, err := ioutil.ReadFile(opts.General.Config)
+		if err != nil {
+			return true, exitError("Could not read config file: %q", opts.General.Config)
+		}
+		err = yaml.Unmarshal(yamlFile, &opts.Config)
+		if err != nil {
+			return true, exitError("Could not unmarshall config file: %q, %v", opts.General.Config, err)
+		}
+	}
+
 	return false, 0
 }
 
-func debug(opts *options, format string, args ...interface{}) {
+func debug(opts *models.Options, format string, args ...interface{}) {
 	if opts.General.Debug {
 		fmt.Printf(format+"\n", args...)
 	}
 }
 
-func verbose(opts *options, format string, args ...interface{}) {
+func verbose(opts *models.Options, format string, args ...interface{}) {
 	if opts.General.Verbose || opts.General.Debug {
 		fmt.Printf(format+"\n", args...)
 	}
@@ -159,14 +134,14 @@ func (ms *mutationStats) Total() int {
 }
 
 func mainCmd(args []string) int {
-	var opts = &options{}
+	var opts = &models.Options{}
 	var mutationBlackList = map[string]struct{}{}
 
 	if exit, exitCode := checkArguments(args, opts); exit {
 		return exitCode
 	}
 
-	files := importing.FilesOfArgs(opts.Remaining.Targets)
+	files := importing.FilesOfArgs(opts.Remaining.Targets, opts)
 	if len(files) == 0 {
 		return exitError("Could not find any suitable Go source files")
 	}
@@ -308,7 +283,7 @@ MUTATOR:
 	return returnOk
 }
 
-func mutate(opts *options, mutators []mutatorItem, mutationBlackList map[string]struct{}, mutationID int, pkg *types.Package, info *types.Info, file string, fset *token.FileSet, src ast.Node, node ast.Node, tmpFile string, execs []string, stats *mutationStats) int {
+func mutate(opts *models.Options, mutators []mutatorItem, mutationBlackList map[string]struct{}, mutationID int, pkg *types.Package, info *types.Info, file string, fset *token.FileSet, src ast.Node, node ast.Node, tmpFile string, execs []string, stats *mutationStats) int {
 	for _, m := range mutators {
 		debug(opts, "Mutator %s", m.Name)
 
@@ -371,7 +346,7 @@ func mutate(opts *options, mutators []mutatorItem, mutationBlackList map[string]
 	return mutationID
 }
 
-func mutateExec(opts *options, pkg *types.Package, file string, src ast.Node, mutationFile string, execs []string) (execExitCode int) {
+func mutateExec(opts *models.Options, pkg *types.Package, file string, src ast.Node, mutationFile string, execs []string) (execExitCode int) {
 	if len(execs) == 0 {
 		debug(opts, "Execute built-in exec command for mutation")
 

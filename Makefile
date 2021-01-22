@@ -1,7 +1,7 @@
 .PHONY: all clean clean-coverage generate install install-dependencies install-tools lint test test-verbose test-verbose-with-coverage
 
 export ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-export PKG := github.com/zimmski/go-mutesting
+export PKG := github.com/avito-tech/go-mutesting
 export ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 export TEST_TIMEOUT_IN_SECONDS := 240
@@ -47,7 +47,6 @@ install-tools:
 	# linting
 	go get -u -v golang.org/x/lint/golint/...
 	go get -u -v github.com/kisielk/errcheck/...
-	go get -u -v honnef.co/go/tools/cmd/megacheck
 
 	# code coverage
 	go get -u -v golang.org/x/tools/cmd/cover
