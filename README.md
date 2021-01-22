@@ -37,7 +37,7 @@ The next mutation shows code from the `removeNode` method of a [linked list](htt
 }
 ```
 
-We know that the code originates from a remove method which means that the mutation introduces a leak by ignoring the removal of a reference. This can be [tested](https://github.com/avito-tech/container/commit/142c3e16a249095b0d63f2b41055d17cf059f045) with [go-leaks](https://github.com/avito-tech/go-leak).
+We know that the code originates from a remove method which means that the mutation introduces a leak by ignoring the removal of a reference. This can be [tested](https://github.com/zimmski/container/commit/142c3e16a249095b0d63f2b41055d17cf059f045) with [go-leaks](https://github.com/zimmski/go-leak).
 
 ## <a name="table-of-content"></a>Table of content
 
@@ -60,7 +60,7 @@ The definition of mutation testing is best quoted from Wikipedia:
 
 Although the definition states that the main purpose of mutation testing is finding implementation cases which are not covered by tests, other implementation flaws can be found too. Mutation testing can for example uncover dead and unneeded code.
 
-Mutation testing is also especially interesting for comparing automatically generated test suites with manually written test suites. This was the original intention of go-mutesting which is used to evaluate the generic fuzzing and delta-debugging framework [Tavor](https://github.com/avito-tech/tavor).
+Mutation testing is also especially interesting for comparing automatically generated test suites with manually written test suites. This was the original intention of go-mutesting which is used to evaluate the generic fuzzing and delta-debugging framework [Tavor](https://github.com/zimmski/tavor).
 
 ## <a name="how-do-i-use-go-mutesting"></a>How do I use go-mutesting?
 
@@ -272,4 +272,4 @@ All of them have significant flaws in comparison to go-mutesting:
 
 ## <a name="feature-request"></a>Can I make feature requests and report bugs and problems?
 
-Sure, just submit an [issue via the project tracker](https://github.com/avito-tech/go-mutesting/issues/new) and I will see what I can do. Please note that I do not guarantee to implement anything soon and bugs and problems are more important to me than new features. If you need something implemented or fixed right away you can contact me via mail <mz@nethead.at> to do contract work for you.
+Sure, just submit an [issue via the project tracker](https://github.com/avito-tech/go-mutesting/issues/new) and we will see what I can do.
