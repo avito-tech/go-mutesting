@@ -24,12 +24,12 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
-	"github.com/zimmski/go-mutesting"
-	"github.com/zimmski/go-mutesting/astutil"
-	"github.com/zimmski/go-mutesting/mutator"
-	_ "github.com/zimmski/go-mutesting/mutator/branch"
-	_ "github.com/zimmski/go-mutesting/mutator/expression"
-	_ "github.com/zimmski/go-mutesting/mutator/statement"
+	"github.com/avito-tech/go-mutesting"
+	"github.com/avito-tech/go-mutesting/astutil"
+	"github.com/avito-tech/go-mutesting/mutator"
+	_ "github.com/avito-tech/go-mutesting/mutator/branch"
+	_ "github.com/avito-tech/go-mutesting/mutator/expression"
+	_ "github.com/avito-tech/go-mutesting/mutator/statement"
 )
 
 const (
