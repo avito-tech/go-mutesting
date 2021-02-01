@@ -42,5 +42,7 @@ type Options struct {
 	Config struct {
 		SkipFileWithoutTest  bool `yaml:"skip_without_test"`
 		SkipFileWithBuildTag bool `yaml:"skip_with_build_tags"`
+		JsonOutput           bool `yaml:"json_output"`
+		SilentMode           bool `yaml:"silent_mode"`
 	}
 }
