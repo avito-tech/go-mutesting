@@ -51,9 +51,9 @@ func (report *Report) MsiScore() float64 {
 		return 0.0
 	}
 
-	return float64(report.Stats.KilledCount+report.Stats.ErrorCount) / float64(total)
+	return float64(report.Stats.KilledCount+report.Stats.ErrorCount+report.Stats.SkippedCount) / float64(total)
 }
 
 func (report *Report) TotalCount() int64 {
-	return report.Stats.KilledCount + report.Stats.EscapedCount + report.Stats.ErrorCount
+	return report.Stats.KilledCount + report.Stats.EscapedCount + report.Stats.ErrorCount + report.Stats.SkippedCount
 }
