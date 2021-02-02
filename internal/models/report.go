@@ -1,5 +1,7 @@
 package models
 
+var ReportFileName string = "report.json"
+
 // Report Structure for mutation report
 type Report struct {
 	Stats     Stats    `json:"stats"`

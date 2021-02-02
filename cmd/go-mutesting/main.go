@@ -13,6 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -276,8 +277,7 @@ MUTATOR:
 		return exitError(err.Error())
 	}
 
-	reportName := "result.json"
-	file, err := os.OpenFile(reportName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(models.ReportFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return exitError(err.Error())
 	}
@@ -296,7 +296,7 @@ MUTATOR:
 		return exitError(err.Error())
 	}
 
-	verbose(opts, "Save report into %q", reportName)
+	verbose(opts, "Save report into %q", models.ReportFileName)
 
 	return returnOk
 }
@@ -308,11 +308,11 @@ func mutate(
 	mutationID int,
 	pkg *types.Package,
 	info *types.Info,
-	file string,
+	originalFile string,
 	fset *token.FileSet,
 	src ast.Node,
 	node ast.Node,
-	tmpFile string,
+	mutatedFile string,
 	execs []string,
 	stats *models.Report,
 ) int {
@@ -327,13 +327,18 @@ func mutate(
 			if !ok {
 				break
 			}
+
+			originalSourceCode, err := ioutil.ReadFile(originalFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			mutant := models.Mutant{}
 			mutant.Mutator.MutatorName = m.Name
-			mutant.Mutator.OriginalFilePath = file
-			mutant.Mutator.OriginalSourceCode = file   // todo check
-			mutant.Mutator.MutatedSourceCode = tmpFile // todo check
+			mutant.Mutator.OriginalFilePath = originalFile
+			mutant.Mutator.OriginalSourceCode = string(originalSourceCode)
 
-			mutationFile := fmt.Sprintf("%s.%d", tmpFile, mutationID)
+			mutationFile := fmt.Sprintf("%s.%d", mutatedFile, mutationID)
 			checksum, duplicate, err := saveAST(mutationBlackList, mutationFile, fset, src)
 			if err != nil {
 				fmt.Printf("INTERNAL ERROR %s\n", err.Error())
@@ -345,9 +350,15 @@ func mutate(
 				debug(opts, "Save mutation into %q with checksum %s", mutationFile, checksum)
 
 				if !opts.Exec.NoExec {
-					execExitCode := mutateExec(opts, pkg, file, src, mutationFile, execs, &mutant)
+					execExitCode := mutateExec(opts, pkg, originalFile, src, mutationFile, execs, &mutant)
 
 					debug(opts, "Exited with %d", execExitCode)
+
+					mutatedSourceCode, err := ioutil.ReadFile(mutationFile)
+					if err != nil {
+						log.Fatal(err)
+					}
+					mutant.Mutator.MutatedSourceCode = string(mutatedSourceCode)
 
 					msg := fmt.Sprintf("%q with checksum %s", mutationFile, checksum)
 
