@@ -281,6 +281,11 @@ MUTATOR:
 	if err != nil {
 		return exitError(err.Error())
 	}
+
+	if file == nil {
+		return exitError("Cannot create file for report")
+	}
+
 	defer func() {
 		err = file.Close()
 		if err != nil {
@@ -288,9 +293,6 @@ MUTATOR:
 		}
 	}()
 
-	if file == nil {
-		return exitError("Cannot create file for report")
-	}
 	_, err = file.WriteString(string(jsonContent))
 	if err != nil {
 		return exitError(err.Error())
