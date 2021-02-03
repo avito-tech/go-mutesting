@@ -242,6 +242,21 @@ Examples for exec commands can be found in the [scripts](/scripts/exec) director
 | :------------------ | :--------------------------------------------- |
 | statement/remove    | Removes assignment, increment, decrement and expression statements. |
 
+## Config file
+
+There is a configuration file where you can fine-tune mutation testing.
+The config will be filled in YAML format.
+It can be connected using the "--config" parameter
+The config contains the following parameters:
+
+
+| Name                 | Default value |Description                                    |
+| :------------------- | :------------ |:--------------------------------------------- |
+| skip_without_test    | true          | Skip files without _test.go tests. |
+| skip_with_build_tags | true          | If in _test.go file we have --build tag - then skip it. |
+| json_output          | false         | Make report.json file with a mutation test report. |
+| silent_mode          | false         | Do not print mutation stats. |
+
 ## <a name="write-mutators"></a>How do I write my own mutators?
 
 Each mutator must implement the `Mutator` interface of the [github.com/avito-tech/go-mutesting/mutator](https://godoc.org/github.com/avito-tech/go-mutesting/mutator#Mutator) package. The methods of the interface are described in detail in the source code documentation.
