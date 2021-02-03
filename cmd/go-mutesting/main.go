@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -12,6 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,7 +22,7 @@ import (
 	"syscall"
 
 	"github.com/avito-tech/go-mutesting/internal/importing"
-	models "github.com/avito-tech/go-mutesting/internal/models"
+	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -110,27 +112,6 @@ func exitError(format string, args ...interface{}) int {
 type mutatorItem struct {
 	Name    string
 	Mutator mutator.Mutator
-}
-
-type mutationStats struct {
-	passed     int
-	failed     int
-	duplicated int
-	skipped    int
-}
-
-func (ms *mutationStats) Score() float64 {
-	total := ms.Total()
-
-	if total == 0 {
-		return 0.0
-	}
-
-	return float64(ms.passed) / float64(total)
-}
-
-func (ms *mutationStats) Total() int {
-	return ms.passed + ms.failed + ms.skipped
 }
 
 func mainCmd(args []string) int {
@@ -224,7 +205,7 @@ MUTATOR:
 		execs = strings.Split(opts.Exec.Exec, " ")
 	}
 
-	stats := &mutationStats{}
+	report := &models.Report{}
 
 	for _, file := range files {
 		verbose(opts, "Mutate %q", file)
@@ -258,11 +239,11 @@ MUTATOR:
 
 			for _, f := range astutil.Functions(src) {
 				if m.MatchString(f.Name.Name) {
-					mutationID = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, f, tmpFile, execs, stats)
+					mutationID = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, f, tmpFile, execs, report)
 				}
 			}
 		} else {
-			_ = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, src, tmpFile, execs, stats)
+			_ = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, src, tmpFile, execs, report)
 		}
 	}
 
@@ -274,16 +255,69 @@ MUTATOR:
 		debug(opts, "Remove %q", tmpDir)
 	}
 
+	report.Calculate()
+
 	if !opts.Exec.NoExec {
-		fmt.Printf("The mutation score is %f (%d passed, %d failed, %d duplicated, %d skipped, total is %d)\n", stats.Score(), stats.passed, stats.failed, stats.duplicated, stats.skipped, stats.Total())
+		if !opts.Config.SilentMode {
+			fmt.Printf("The mutation score is %f (%d passed, %d failed, %d duplicated, %d skipped, total is %d)\n",
+				report.Stats.Msi,
+				report.Stats.KilledCount,
+				report.Stats.EscapedCount,
+				report.Stats.DuplicatedCount,
+				report.Stats.SkippedCount,
+				report.Stats.TotalMutantsCount,
+			)
+		}
 	} else {
 		fmt.Println("Cannot do a mutation testing summary since no exec command was executed.")
 	}
 
+	jsonContent, err := json.Marshal(report)
+	if err != nil {
+		return exitError(err.Error())
+	}
+
+	file, err := os.OpenFile(models.ReportFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return exitError(err.Error())
+	}
+
+	if file == nil {
+		return exitError("Cannot create file for report")
+	}
+
+	defer func() {
+		err = file.Close()
+		if err != nil {
+			fmt.Printf("Error while report file closing: %v", err.Error())
+		}
+	}()
+
+	_, err = file.WriteString(string(jsonContent))
+	if err != nil {
+		return exitError(err.Error())
+	}
+
+	verbose(opts, "Save report into %q", models.ReportFileName)
+
 	return returnOk
 }
 
-func mutate(opts *models.Options, mutators []mutatorItem, mutationBlackList map[string]struct{}, mutationID int, pkg *types.Package, info *types.Info, file string, fset *token.FileSet, src ast.Node, node ast.Node, tmpFile string, execs []string, stats *mutationStats) int {
+func mutate(
+	opts *models.Options,
+	mutators []mutatorItem,
+	mutationBlackList map[string]struct{},
+	mutationID int,
+	pkg *types.Package,
+	info *types.Info,
+	originalFile string,
+	fset *token.FileSet,
+	src ast.Node,
+	node ast.Node,
+	mutatedFile string,
+	execs []string,
+	stats *models.Report,
+) int {
 	for _, m := range mutators {
 		debug(opts, "Mutator %s", m.Name)
 
@@ -296,39 +330,76 @@ func mutate(opts *models.Options, mutators []mutatorItem, mutationBlackList map[
 				break
 			}
 
-			mutationFile := fmt.Sprintf("%s.%d", tmpFile, mutationID)
+			originalSourceCode, err := ioutil.ReadFile(originalFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			mutant := models.Mutant{}
+			mutant.Mutator.MutatorName = m.Name
+			mutant.Mutator.OriginalFilePath = originalFile
+			mutant.Mutator.OriginalSourceCode = string(originalSourceCode)
+
+			mutationFile := fmt.Sprintf("%s.%d", mutatedFile, mutationID)
 			checksum, duplicate, err := saveAST(mutationBlackList, mutationFile, fset, src)
 			if err != nil {
 				fmt.Printf("INTERNAL ERROR %s\n", err.Error())
 			} else if duplicate {
 				debug(opts, "%q is a duplicate, we ignore it", mutationFile)
 
-				stats.duplicated++
+				stats.Stats.DuplicatedCount++
 			} else {
 				debug(opts, "Save mutation into %q with checksum %s", mutationFile, checksum)
 
 				if !opts.Exec.NoExec {
-					execExitCode := mutateExec(opts, pkg, file, src, mutationFile, execs)
+					execExitCode := mutateExec(opts, pkg, originalFile, src, mutationFile, execs, &mutant)
 
 					debug(opts, "Exited with %d", execExitCode)
+
+					mutatedSourceCode, err := ioutil.ReadFile(mutationFile)
+					if err != nil {
+						log.Fatal(err)
+					}
+					mutant.Mutator.MutatedSourceCode = string(mutatedSourceCode)
 
 					msg := fmt.Sprintf("%q with checksum %s", mutationFile, checksum)
 
 					switch execExitCode {
-					case 0:
-						fmt.Printf("PASS %s\n", msg)
+					case 0: // Tests failed - all ok
+						out := fmt.Sprintf("PASS %s\n", msg)
+						if !opts.Config.SilentMode {
+							fmt.Print(out)
+						}
 
-						stats.passed++
-					case 1:
-						fmt.Printf("FAIL %s\n", msg)
+						mutant.ProcessOutput = out
+						stats.Killed = append(stats.Killed, mutant)
+						stats.Stats.KilledCount++
+					case 1: // Tests passed
+						out := fmt.Sprintf("FAIL %s\n", msg)
+						if !opts.Config.SilentMode {
+							fmt.Print(out)
+						}
 
-						stats.failed++
-					case 2:
-						fmt.Printf("SKIP %s\n", msg)
+						mutant.ProcessOutput = out
+						stats.Escaped = append(stats.Escaped, mutant)
+						stats.Stats.EscapedCount++
+					case 2: // Did not compile
+						out := fmt.Sprintf("SKIP %s\n", msg)
+						if !opts.Config.SilentMode {
+							fmt.Print(out)
+						}
 
-						stats.skipped++
+						mutant.ProcessOutput = out
+						stats.Stats.SkippedCount++
 					default:
-						fmt.Printf("UNKOWN exit code for %s\n", msg)
+						out := fmt.Sprintf("UNKOWN exit code for %s\n", msg)
+						if !opts.Config.SilentMode {
+							fmt.Print(out)
+						}
+
+						mutant.ProcessOutput = out
+						stats.Errored = append(stats.Errored, mutant)
+						stats.Stats.ErrorCount++
 					}
 				}
 			}
@@ -346,7 +417,15 @@ func mutate(opts *models.Options, mutators []mutatorItem, mutationBlackList map[
 	return mutationID
 }
 
-func mutateExec(opts *models.Options, pkg *types.Package, file string, src ast.Node, mutationFile string, execs []string) (execExitCode int) {
+func mutateExec(
+	opts *models.Options,
+	pkg *types.Package,
+	file string,
+	src ast.Node,
+	mutationFile string,
+	execs []string,
+	mutant *models.Mutant,
+) (execExitCode int) {
 	if len(execs) == 0 {
 		debug(opts, "Execute built-in exec command for mutation")
 
@@ -395,9 +474,13 @@ func mutateExec(opts *models.Options, pkg *types.Package, file string, src ast.N
 			fmt.Printf("%s\n", test)
 		}
 
+		mutant.Diff = string(diff)
+
 		switch execExitCode {
 		case 0: // Tests passed -> FAIL
-			fmt.Printf("%s\n", diff)
+			if !opts.Config.SilentMode {
+				fmt.Printf("%s\n", diff)
+			}
 
 			execExitCode = 1
 		case 1: // Tests failed -> PASS
@@ -415,8 +498,10 @@ func mutateExec(opts *models.Options, pkg *types.Package, file string, src ast.N
 				fmt.Printf("%s\n", diff)
 			}
 		default: // Unknown exit code -> SKIP
-			fmt.Println("Unknown exit code")
-			fmt.Printf("%s\n", diff)
+			if !opts.Config.SilentMode {
+				fmt.Println("Unknown exit code")
+				fmt.Printf("%s\n", diff)
+			}
 		}
 
 		return execExitCode
