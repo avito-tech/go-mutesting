@@ -244,10 +244,10 @@ Examples for exec commands can be found in the [scripts](/scripts/exec) director
 
 ## Config file
 
-There is a configuration file where you can fine-tune mutation testing.
-The config will be filled in YAML format.
-It can be connected using the "--config" parameter
-The config contains the following parameters:
+There is a configuration file where you can fine-tune mutation testing.  
+The config must be written in YAML format.  
+If `--config` is presented, the library will use the given config. Otherwise, no default config file will be used.  
+The config contains the following parameters:  
 
 
 | Name                 | Default value |Description                                    |
