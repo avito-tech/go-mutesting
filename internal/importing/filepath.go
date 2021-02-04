@@ -60,8 +60,8 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 
 		if len(opts.Config.ExcludeDirs) > 0 { // ignore files in excluded dirs
 			dirIsExcluded := false
-			for _, ex_dir := range opts.Config.ExcludeDirs {
-				if strings.HasPrefix(filename, ex_dir) {
+			for _, exDir := range opts.Config.ExcludeDirs {
+				if strings.HasPrefix(filename, exDir) {
 					dirIsExcluded = true
 					break
 				}
