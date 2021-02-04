@@ -216,3 +216,92 @@ func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
 }
+
+func TestFilesWithExcludedDirs(t *testing.T) {
+	p := os.Getenv("GOPATH") + "/src/"
+
+	for _, test := range []struct {
+		args   []string
+		expect []string
+		config []string
+	}{
+		// files
+		{
+			[]string{"./filepathfixtures/first.go"},
+			[]string{"./filepathfixtures/first.go"},
+			[]string(nil),
+		},
+		{
+			[]string{"./filepathfixtures/second.go"},
+			[]string{"./filepathfixtures/second.go"},
+			[]string{"filepathfixtures"},
+		},
+		{
+			[]string{"filepathfixtures/second.go"},
+			[]string(nil),
+			[]string{"filepathfixtures"},
+		},
+		{
+			[]string{"./filepathfixtures/second.go"},
+			[]string(nil),
+			[]string{"./filepathfixtures"},
+		},
+		// directories
+		{
+			[]string{"./filepathfixtures/..."},
+			[]string{
+				"filepathfixtures/first.go",
+				"filepathfixtures/second.go",
+				"filepathfixtures/third.go",
+			},
+			[]string{"filepathfixtures/secondfixturespackage"},
+		},
+		{
+			[]string{"./filepathfixtures/..."},
+			[]string(nil),
+			[]string{"filepathfixtures"},
+		},
+		{
+			[]string{"./filepathfixtures"},
+			[]string(nil),
+			[]string{"filepathfixtures"},
+		},
+		{
+			[]string{"./filepathfixtures"},
+			[]string{
+				"filepathfixtures/first.go",
+				"filepathfixtures/second.go",
+				"filepathfixtures/third.go",
+			},
+			[]string(nil),
+		},
+
+		//packages
+		{
+			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
+			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage/fourth.go",
+			},
+			[]string{"filepathfixtures"},
+		},
+		{
+			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
+			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
+			},
+			[]string{p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage/"},
+		},
+	} {
+		var opts = &models.Options{}
+		opts.Config.ExcludeDirs = test.config
+
+		got := FilesOfArgs(test.args, opts)
+
+		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
+	}
+}

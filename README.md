@@ -256,6 +256,7 @@ The config contains the following parameters:
 | skip_with_build_tags | true          | If in _test.go file we have --build tag - then skip it. |
 | json_output          | false         | Make report.json file with a mutation test report. |
 | silent_mode          | false         | Do not print mutation stats. |
+| exclude_dirs         | []string(nil) | Directories for excluding. In fact, there are not directories. These are the prefix for a path when we scan a file system. So this parameter is sensitive for args |
 
 ## <a name="write-mutators"></a>How do I write my own mutators?
 
