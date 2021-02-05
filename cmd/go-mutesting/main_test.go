@@ -57,7 +57,7 @@ func TestMainSkipWithoutTest(t *testing.T) {
 	testMain(
 		t,
 		"../../example",
-		[]string{"--debug", "--exec-timeout", "1", "--config", "../config.yml.dist"},
+		[]string{"--debug", "--exec-timeout", "1", "--config", "../testdata/configs/configSkipWithoutTest.yml.test"},
 		returnOk,
 		"The mutation score is 0.500000 (9 passed, 9 failed, 8 duplicated, 0 skipped, total is 18)",
 	)
