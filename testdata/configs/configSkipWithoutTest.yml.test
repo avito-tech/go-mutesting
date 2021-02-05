@@ -2,5 +2,4 @@ skip_without_test: true
 skip_with_build_tags: true
 json_output: false
 silent_mode: false
-exclude_dirs:
- - example
+
