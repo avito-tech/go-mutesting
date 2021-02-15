@@ -429,7 +429,7 @@ func mutateExec(
 	if len(execs) == 0 {
 		debug(opts, "Execute built-in exec command for mutation")
 
-		diff, err := exec.Command("diff", "-u", file, mutationFile).CombinedOutput()
+		diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
 		if err == nil {
 			execExitCode = 0
 		} else if e, ok := err.(*exec.ExitError); ok {
