@@ -221,6 +221,51 @@ Examples for exec commands can be found in the [scripts](/scripts/exec) director
 
 ## <a name="list-of-mutators"></a>Which mutators are implemented?
 
+### Arithmetic mutators
+#### arithmetic/base
+| Name	         | Original | Mutated |
+| :------------- | :------- | :------ |
+| Plus           | +        | -       |
+| Minus          | -        | +       |
+| Multiplication | *        | /       |
+| Division       | /        | *       |
+| Modulus        | %        | *       |
+
+#### arithmetic/bitwise
+| Name	        | Original | Mutated |
+| :------------ | :------- | :------ |
+| BitwiseAnd    | &        | &#124;  |
+| BitwiseOr     | &#124;   | &       |
+| BitwiseXor    | ^        | &       |
+| BitwiseAndNot | &^       | &       |
+| ShiftRight    | \>>      | <<      |
+| ShiftLeft     | <<       | \>>     |
+
+#### arithmetic/assign_invert
+| Name	        | Original | Mutated |
+| :------------ | :------- | :------ |
+| AddAssign     | +=       | -=      |
+| SubAssign     | -=       | +=      |
+| MulAssign     | *=       | /=      |
+| QuoAssign     | /=       | *=      |
+| RemAssign     | %=       | *=      |
+
+#### arithmetic/assignment
+| Name	           | Original | Mutated |
+| :--------------- | :------- | :------ |
+| AddAssignment    | +=       | =       |
+| SubAssignment    | -=       | =       |
+| MulAssignment    | *=       | =       |
+| QuoAssignment    | /=       | =       |
+| RemAssignment    | %=       | =       |
+| AndAssignment    | &=       | =       |
+| OrAssignment     | &#124;=  | =       |
+| XorAssignment    | ^=       | =       |
+| SHLAssignment    | <<=      | =       |
+| SHRAssignment    | \>>=     | =       |
+| AndNotAssignment | &^=      | =       |
+
+
 ### Branch mutators
 
 | Name          | Description                                        |

@@ -13,7 +13,6 @@ func init() {
 }
 
 var assignmentMutations = map[token.Token]token.Token{
-	//token.EQL: token.ASSIGN,
 	token.ADD_ASSIGN:     token.ASSIGN,
 	token.SUB_ASSIGN:     token.ASSIGN,
 	token.MUL_ASSIGN:     token.ASSIGN,
