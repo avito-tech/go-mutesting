@@ -28,8 +28,8 @@ func MutatorArithmeticBitwise(_ *types.Package, _ *types.Info, node ast.Node) []
 		return nil
 	}
 
-	o := n.Op
-	r, ok := bitwiseMutations[n.Op]
+	original := n.Op
+	mutated, ok := bitwiseMutations[n.Op]
 	if !ok {
 		return nil
 	}
@@ -37,10 +37,10 @@ func MutatorArithmeticBitwise(_ *types.Package, _ *types.Info, node ast.Node) []
 	return []mutator.Mutation{
 		{
 			Change: func() {
-				n.Op = r
+				n.Op = mutated
 			},
 			Reset: func() {
-				n.Op = o
+				n.Op = original
 			},
 		},
 	}

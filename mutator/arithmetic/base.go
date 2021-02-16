@@ -27,8 +27,8 @@ func MutatorArithmeticBase(_ *types.Package, _ *types.Info, node ast.Node) []mut
 		return nil
 	}
 
-	o := n.Op
-	r, ok := arithmeticMutations[n.Op]
+	original := n.Op
+	mutated, ok := arithmeticMutations[n.Op]
 	if !ok {
 		return nil
 	}
@@ -36,10 +36,10 @@ func MutatorArithmeticBase(_ *types.Package, _ *types.Info, node ast.Node) []mut
 	return []mutator.Mutation{
 		{
 			Change: func() {
-				n.Op = r
+				n.Op = mutated
 			},
 			Reset: func() {
-				n.Op = o
+				n.Op = original
 			},
 		},
 	}

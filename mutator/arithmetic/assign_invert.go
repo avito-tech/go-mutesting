@@ -27,8 +27,8 @@ func MutatorArithmeticAssignInvert(_ *types.Package, _ *types.Info, node ast.Nod
 		return nil
 	}
 
-	o := n.Tok
-	r, ok := assignInvertMutations[n.Tok]
+	original := n.Tok
+	mutated, ok := assignInvertMutations[n.Tok]
 	if !ok {
 		return nil
 	}
@@ -36,10 +36,10 @@ func MutatorArithmeticAssignInvert(_ *types.Package, _ *types.Info, node ast.Nod
 	return []mutator.Mutation{
 		{
 			Change: func() {
-				n.Tok = r
+				n.Tok = mutated
 			},
 			Reset: func() {
-				n.Tok = o
+				n.Tok = original
 			},
 		},
 	}

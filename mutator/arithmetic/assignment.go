@@ -33,8 +33,8 @@ func MutatorArithmeticAssignment(_ *types.Package, _ *types.Info, node ast.Node)
 		return nil
 	}
 
-	o := n.Tok
-	r, ok := assignmentMutations[n.Tok]
+	original := n.Tok
+	mutated, ok := assignmentMutations[n.Tok]
 	if !ok {
 		return nil
 	}
@@ -42,10 +42,10 @@ func MutatorArithmeticAssignment(_ *types.Package, _ *types.Info, node ast.Node)
 	return []mutator.Mutation{
 		{
 			Change: func() {
-				n.Tok = r
+				n.Tok = mutated
 			},
 			Reset: func() {
-				n.Tok = o
+				n.Tok = original
 			},
 		},
 	}
