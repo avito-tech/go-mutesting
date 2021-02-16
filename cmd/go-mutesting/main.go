@@ -29,6 +29,7 @@ import (
 	"github.com/avito-tech/go-mutesting"
 	"github.com/avito-tech/go-mutesting/astutil"
 	"github.com/avito-tech/go-mutesting/mutator"
+	_ "github.com/avito-tech/go-mutesting/mutator/arithmetic"
 	_ "github.com/avito-tech/go-mutesting/mutator/branch"
 	_ "github.com/avito-tech/go-mutesting/mutator/expression"
 	_ "github.com/avito-tech/go-mutesting/mutator/statement"
