@@ -266,6 +266,41 @@ Examples for exec commands can be found in the [scripts](/scripts/exec) director
 | AndNotAssignment | &^=      | =       |
 
 
+### Loop mutators
+#### loop/break
+Name	           | Original | Mutated  |
+| :--------------- | :------- | :------- |
+| Break            | break    | continue |
+| Continue         | continue | break    |
+
+#### loop/condition
+Name	                 | Original | Mutated  |
+| :--------------------- | :------- | :------- |
+| for k < 100            | k < 100  | 1 < 1    |
+| for i := 0; i < 5; i++ | i < 5    | 1 < 1    |
+
+#### loop/range_break
+It is a loop/condition-like mutator in its purpose: removing iterations from code.  
+However, the implementation is slightly different. The mutator adds a break to the beginning of each range loop.
+
+Name	             | Original Body | Mutated Body |
+| :----------------- | :------------ | :----------- |
+| for i,v := range x | without break | with break   |
+
+### Numbers mutators
+#### numbers/incrementer
+Name	           | Original | Mutated  |
+| :--------------- | :------- | :------- |
+| IncrementInteger | 100      | 101      |
+| IncrementFloat   | 10.1     | 11.1     |
+
+#### numbers/decrementer
+Name	           | Original | Mutated  |
+| :--------------- | :------- | :------- |
+| DecrementInteger | 100      | 99       |
+| DecrementFloat   | 10.1     | 9.1      |
+
+
 ### Branch mutators
 
 | Name          | Description                                        |
