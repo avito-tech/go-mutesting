@@ -30,6 +30,8 @@ func MutatorLoopRangeBreak(_ *types.Package, _ *types.Info, node ast.Node) []mut
 		list = n.List
 	case *ast.CaseClause:
 		list = n.Body
+	default:
+		return nil
 	}
 
 	var mutations []mutator.Mutation
