@@ -19,7 +19,7 @@ func TestMainSimple(t *testing.T) {
 		"../../example",
 		[]string{"--debug", "--exec-timeout", "1"},
 		returnOk,
-		"The mutation score is 0.551724 (16 passed, 13 failed, 8 duplicated, 0 skipped, total is 29)",
+		"The mutation score is 0.564516 (35 passed, 27 failed, 8 duplicated, 0 skipped, total is 62)",
 	)
 }
 
@@ -29,7 +29,7 @@ func TestMainRecursive(t *testing.T) {
 		"../../example",
 		[]string{"--debug", "--exec-timeout", "1", "./..."},
 		returnOk,
-		"The mutation score is 0.580645 (18 passed, 13 failed, 8 duplicated, 0 skipped, total is 31)",
+		"The mutation score is 0.590909 (39 passed, 27 failed, 8 duplicated, 0 skipped, total is 66)",
 	)
 }
 
@@ -39,7 +39,7 @@ func TestMainFromOtherDirectory(t *testing.T) {
 		"../..",
 		[]string{"--debug", "--exec-timeout", "1", "github.com/avito-tech/go-mutesting/example"},
 		returnOk,
-		"The mutation score is 0.551724 (16 passed, 13 failed, 8 duplicated, 0 skipped, total is 29)",
+		"The mutation score is 0.564516 (35 passed, 27 failed, 8 duplicated, 0 skipped, total is 62)",
 	)
 }
 
@@ -49,7 +49,7 @@ func TestMainMatch(t *testing.T) {
 		"../../example",
 		[]string{"--debug", "--exec", "../scripts/exec/test-mutated-package.sh", "--exec-timeout", "1", "--match", "baz", "./..."},
 		returnOk,
-		"The mutation score is 0.500000 (2 passed, 2 failed, 0 duplicated, 0 skipped, total is 4)",
+		"The mutation score is 0.500000 (4 passed, 4 failed, 0 duplicated, 0 skipped, total is 8)",
 	)
 }
 
@@ -59,7 +59,7 @@ func TestMainSkipWithoutTest(t *testing.T) {
 		"../../example",
 		[]string{"--debug", "--exec-timeout", "1", "--config", "../testdata/configs/configSkipWithoutTest.yml.test"},
 		returnOk,
-		"The mutation score is 0.592593 (16 passed, 11 failed, 8 duplicated, 0 skipped, total is 27)",
+		"The mutation score is 0.583333 (35 passed, 25 failed, 8 duplicated, 0 skipped, total is 60)",
 	)
 }
 
@@ -81,7 +81,7 @@ func TestMainJSONReport(t *testing.T) {
 		"../../example",
 		[]string{"--debug", "--exec-timeout", "1", "--config", "../testdata/configs/configForJson.yml.test"},
 		returnOk,
-		"The mutation score is 0.592593 (16 passed, 11 failed, 8 duplicated, 0 skipped, total is 27)",
+		"The mutation score is 0.583333 (35 passed, 25 failed, 8 duplicated, 0 skipped, total is 60)",
 	)
 
 	info, err := os.Stat(jsonFile)
@@ -103,23 +103,23 @@ func TestMainJSONReport(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedStats := models.Stats{
-		TotalMutantsCount:    27,
-		KilledCount:          16,
+		TotalMutantsCount:    60,
+		KilledCount:          35,
 		NotCoveredCount:      0,
-		EscapedCount:         11,
+		EscapedCount:         25,
 		ErrorCount:           0,
 		SkippedCount:         0,
 		TimeOutCount:         0,
-		Msi:                  0.5925925925925926,
+		Msi:                  0.5833333333333334,
 		MutationCodeCoverage: 0,
 		CoveredCodeMsi:       0,
 		DuplicatedCount:      0,
 	}
 
 	assert.Equal(t, expectedStats, mutationReport.Stats)
-	assert.Equal(t, 11, len(mutationReport.Escaped))
+	assert.Equal(t, 25, len(mutationReport.Escaped))
 	assert.Nil(t, mutationReport.Timeouted)
-	assert.Equal(t, 16, len(mutationReport.Killed))
+	assert.Equal(t, 35, len(mutationReport.Killed))
 	assert.Nil(t, mutationReport.Errored)
 
 	for i := 0; i < len(mutationReport.Escaped); i++ {
