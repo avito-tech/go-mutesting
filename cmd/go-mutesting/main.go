@@ -464,7 +464,10 @@ func mutateExec(
 			pkgName += "/..."
 		}
 
-		test, err := exec.Command("go", "test", "-timeout", fmt.Sprintf("%ds", opts.Exec.Timeout), pkgName).CombinedOutput()
+		goTestCmd := exec.Command("go", "test", "-timeout", fmt.Sprintf("%ds", opts.Exec.Timeout), pkgName)
+		goTestCmd.Env = os.Environ()
+
+		test, err := goTestCmd.CombinedOutput()
 		if err == nil {
 			execExitCode = 0
 		} else if e, ok := err.(*exec.ExitError); ok {
