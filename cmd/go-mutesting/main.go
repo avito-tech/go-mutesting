@@ -18,7 +18,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"syscall"
 
@@ -467,7 +466,6 @@ func mutateExec(
 
 		goTestCmd := exec.Command("go", "test", "-timeout", fmt.Sprintf("%ds", opts.Exec.Timeout), pkgName)
 		goTestCmd.Env = os.Environ()
-		goTestCmd.Env = append(goTestCmd.Env, "GOROOT="+runtime.GOROOT())
 
 		test, err := goTestCmd.CombinedOutput()
 		if err == nil {
