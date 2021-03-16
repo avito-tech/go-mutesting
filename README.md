@@ -300,27 +300,46 @@ Name	           | Original | Mutated  |
 | DecrementInteger | 100      | 99       |
 | DecrementFloat   | 10.1     | 9.1      |
 
+### Conditional mutators
+#### conditional/negated
+Name	                          | Original | Mutated  |
+| :------------------------------ | :------- | :------- |
+| GreaterThanNegotiation          | \>       | <=       |
+| LessThanNegotiation             | <        | \>=      |
+| GreaterThanOrEqualToNegotiation | \>=      | <        |
+| LessThanOrEqualToNegotiation    | <=       | \>       |
+| Equal                           | ==       | !=       |
+| NotEqual                        | !=       | ==       |
+
+If you are looking for simple comparison mutators - see [expression-mutators](#expression-mutators)
 
 ### Branch mutators
+#### branch/case
+Empties case bodies.
 
-| Name          | Description                                        |
-| :------------ | :------------------------------------------------- |
-| branch/case   | Empties case bodies.                               |
-| branch/if     | Empties branches of `if` and `else if` statements. |
-| branch/else   | Empties branches of `else` statements.             |
+#### branch/if
+Empties branches of `if` and `else if` statements.
+
+#### branch/else
+Empties branches of `else` statements.
 
 ### Expression mutators
+#### expression/comparison
+Searches for comparison operators, such as `>` and `<=`, and replaces them with similar operators to catch off-by-one errors, e.g. `>` is replaced by `>=`.
 
-| Name                  | Description                                    |
-| :-------------------- | :--------------------------------------------- |
-| expression/comparison | Searches for comparison operators, such as `>` and `<=`, and replaces them with similar operators to catch off-by-one errors, e.g. `>` is replaced by `>=`. |
-| expression/remove     | Searches for `&&` and <code>\|\|</code> operators and makes each term of the operator irrelevant by using `true` or `false` as replacements. |
+Name	               | Original | Mutated  |
+| :------------------- | :------- | :------- |
+| GreaterThan          | \>       | \>=      |
+| LessThan             | <        | <=       |
+| GreaterThanOrEqualTo | \>=      | \>       |
+| LessThanOrEqualTo    | <=       | <        |
+
+#### expression/remove
+Searches for `&&` and <code>\|\|</code> operators and makes each term of the operator irrelevant by using `true` or `false` as replacements.
 
 ### Statement mutators
-
-| Name                | Description                                    |
-| :------------------ | :--------------------------------------------- |
-| statement/remove    | Removes assignment, increment, decrement and expression statements. |
+#### statement/remove
+Removes assignment, increment, decrement and expression statements.
 
 ## Config file
 
