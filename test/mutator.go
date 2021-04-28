@@ -61,7 +61,7 @@ func Mutator(t *testing.T, m mutator.Mutator, testFile string, count int) {
 		err = printer.Fprint(buf, fset, src)
 		assert.Nil(t, err)
 
-		assert.Equal(t, string(data), buf.String())
+		assert.Equal(t, "werwer", buf.String())
 
 		changed <- true
 	}
