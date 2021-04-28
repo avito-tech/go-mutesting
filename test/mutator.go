@@ -20,7 +20,7 @@ func Mutator(t *testing.T, m mutator.Mutator, testFile string, count int) {
 	assert.NotNil(t, m)
 
 	// Read the origianl source code
-	data, err := ioutil.ReadFile(testFile)
+	_, err := ioutil.ReadFile(testFile)
 	assert.Nil(t, err)
 
 	// Parse and type-check the original source code
