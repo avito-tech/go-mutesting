@@ -1,7 +1,7 @@
 .PHONY: all clean clean-coverage generate install install-dependencies install-tools lint test test-verbose test-verbose-with-coverage
 
 export ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-export PKG := github.com/avito-tech/go-mutesting
+export PKG := github.com/vasiliyyudin/go-mutesting
 export ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 export TEST_TIMEOUT_IN_SECONDS := 240
@@ -70,3 +70,25 @@ test-verbose:
 test-verbose-with-coverage:
 	ginkgo -r -v -cover -race -skipPackage="testdata"
 .PHONY: test-verbose-with-coverage
+
+
+test-build:
+	go build -o go-mut cmd/go-mutesting/main.go
+.PHONY: test-build
+
+test-ll:
+	./go-mut --config=config.yml.dist /Users/vvyudin/go/src/go.avito.ru/qa/service-mutation-testing/internal/rpc/sum --list-files
+.PHONY: test-ll
+
+test-lm:
+	./go-mut --disable branch/* --config=config.yml.dist /Users/vvyudin/go/src/go.avito.ru/qa/service-mutation-testing/internal/rpc/sum --list-mutators
+.PHONY: test-ll
+
+test-run:
+	./go-mut --config=config.yml.dist /Users/vvyudin/go/src/go.avito.ru/qa/service-mutation-testing/internal/rpc/sum
+.PHONY: test-run
+
+ttt:
+	make test-build
+	make test-run
+.PHONY: ttt

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/models"
+	"github.com/vasiliyyudin/go-mutesting/internal/models"
 	"io"
 	"io/ioutil"
 	"os"
@@ -37,7 +37,7 @@ func TestMainFromOtherDirectory(t *testing.T) {
 	testMain(
 		t,
 		"../..",
-		[]string{"--debug", "--exec-timeout", "1", "github.com/avito-tech/go-mutesting/example"},
+		[]string{"--debug", "--exec-timeout", "1", "github.com/vasiliyyudin/go-mutesting/example"},
 		returnOk,
 		"The mutation score is 0.564516 (35 passed, 27 failed, 8 duplicated, 0 skipped, total is 62)",
 	)

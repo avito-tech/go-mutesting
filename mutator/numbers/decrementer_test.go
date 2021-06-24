@@ -3,7 +3,7 @@ package numbers
 import (
 	"testing"
 
-	"github.com/avito-tech/go-mutesting/test"
+	"github.com/vasiliyyudin/go-mutesting/test"
 )
 
 func TestMutatorNumbersDecrementer(t *testing.T) {

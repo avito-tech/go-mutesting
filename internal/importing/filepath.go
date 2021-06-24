@@ -11,7 +11,7 @@ so TODO and FIXME. Heck I also give you a WORKAROUND.
 
 import (
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/models"
+	"github.com/vasiliyyudin/go-mutesting/internal/models"
 	"go/build"
 	"io/ioutil"
 	"log"

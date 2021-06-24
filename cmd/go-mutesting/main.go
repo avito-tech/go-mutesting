@@ -21,20 +21,20 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/avito-tech/go-mutesting/internal/importing"
-	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/jessevdk/go-flags"
+	"github.com/vasiliyyudin/go-mutesting/internal/importing"
+	"github.com/vasiliyyudin/go-mutesting/internal/models"
 	"github.com/zimmski/osutil"
 
-	"github.com/avito-tech/go-mutesting"
-	"github.com/avito-tech/go-mutesting/astutil"
-	"github.com/avito-tech/go-mutesting/mutator"
-	_ "github.com/avito-tech/go-mutesting/mutator/arithmetic"
-	_ "github.com/avito-tech/go-mutesting/mutator/branch"
-	_ "github.com/avito-tech/go-mutesting/mutator/expression"
-	_ "github.com/avito-tech/go-mutesting/mutator/loop"
-	_ "github.com/avito-tech/go-mutesting/mutator/numbers"
-	_ "github.com/avito-tech/go-mutesting/mutator/statement"
+	"github.com/vasiliyyudin/go-mutesting"
+	"github.com/vasiliyyudin/go-mutesting/astutil"
+	"github.com/vasiliyyudin/go-mutesting/mutator"
+	_ "github.com/vasiliyyudin/go-mutesting/mutator/arithmetic"
+	_ "github.com/vasiliyyudin/go-mutesting/mutator/branch"
+	_ "github.com/vasiliyyudin/go-mutesting/mutator/expression"
+	_ "github.com/vasiliyyudin/go-mutesting/mutator/loop"
+	_ "github.com/vasiliyyudin/go-mutesting/mutator/numbers"
+	_ "github.com/vasiliyyudin/go-mutesting/mutator/statement"
 )
 
 const (
@@ -473,6 +473,7 @@ func mutateExec(
 		} else if e, ok := err.(*exec.ExitError); ok {
 			execExitCode = e.Sys().(syscall.WaitStatus).ExitStatus()
 		} else {
+			fmt.Println("Mutation did not compile")
 			panic(err)
 		}
 

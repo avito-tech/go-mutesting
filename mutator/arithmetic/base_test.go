@@ -3,7 +3,7 @@ package arithmetic
 import (
 	"testing"
 
-	"github.com/avito-tech/go-mutesting/test"
+	"github.com/vasiliyyudin/go-mutesting/test"
 )
 
 func TestMutatorArithmeticBase(t *testing.T) {
