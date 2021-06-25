@@ -61,7 +61,7 @@ func ParseAndTypeCheckFile(file string) (*ast.File, *token.FileSet, *types.Packa
 		conf.CreateFromFilenames(dir, fileAbs)
 	}
 
-	//test
+	//test2
 	conf.AllowErrors = true
 	prog, err := conf.Load()
 	if err != nil {
