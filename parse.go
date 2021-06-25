@@ -61,6 +61,7 @@ func ParseAndTypeCheckFile(file string) (*ast.File, *token.FileSet, *types.Packa
 		conf.CreateFromFilenames(dir, fileAbs)
 	}
 
+	conf.AllowErrors = true
 	prog, err := conf.Load()
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("Could not load package of file %q: %v", file, err)
