@@ -7,6 +7,10 @@ os:
 go:
   - 1.15.x
 
+env:
+  global:
+    - GO111MODULE: "on"
+
 install:
   - make install-dependencies
   - make install-tools
