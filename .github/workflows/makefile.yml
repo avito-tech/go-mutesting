@@ -36,7 +36,7 @@ jobs:
         env:
           GO111MODULE: "off"
 
-       - name: Run go fmt
+      - name: Run go fmt
         run: make ci-gofmt
         env:
           GO111MODULE: "off"
