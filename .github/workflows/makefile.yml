@@ -33,9 +33,15 @@ jobs:
 
       - name: Run lint
         run: make lint
+        env:
+          GO111MODULE: "off"
 
       - name: Run test
         run: make test-verbose-with-coverage
+        env:
+          GO111MODULE: "off"
 
       - name: Run gover
         run: gover
+        env:
+          GO111MODULE: "off"
