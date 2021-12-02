@@ -12,7 +12,7 @@ OUT=$(errcheck $PKG/... 2>&1 | grep --invert-match -E "(/example)")
 if [ -n "$OUT" ]; then echo "$OUT"; PROBLEM=1; fi
 
 echo "go vet:"
-OUT=$(go vet -all=true $ROOT_DIR 2>&1 | grep --invert-match -E "(Checking file|\%p of wrong type|can't check non-constant format|/example)")
+OUT=$(go vet -all=true ./... 2>&1 | grep --invert-match -E "(Checking file|\%p of wrong type|can't check non-constant format|/example)")
 if [ -n "$OUT" ]; then echo "$OUT"; PROBLEM=1; fi
 
 echo "golint:"
