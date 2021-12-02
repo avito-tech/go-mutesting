@@ -55,11 +55,7 @@ install-tools:
 	go get -u -v github.com/mattn/goveralls/...
 .PHONY: install-tools
 
-lint:
-	$(ROOT_DIR)/scripts/ci/errcheck.sh
-	$(ROOT_DIR)/scripts/ci/gofmt.sh
-	$(ROOT_DIR)/scripts/ci/govet.sh
-	$(ROOT_DIR)/scripts/ci/lint.sh
+lint: ci-errcheck ci-gofmt ci-govet ci-lint
 .PHONY: lint
 
 test:
