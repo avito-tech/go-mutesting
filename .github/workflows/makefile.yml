@@ -10,6 +10,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - env:
+          GO111MODULE: "off"
 
       - name: Set up Go
         uses: actions/setup-go@v2
