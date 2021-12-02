@@ -56,7 +56,10 @@ install-tools:
 .PHONY: install-tools
 
 lint:
-	$(ROOT_DIR)/scripts/lint.sh
+	$(ROOT_DIR)/scripts/ci/errcheck.sh
+	$(ROOT_DIR)/scripts/ci/gofmt.sh
+	$(ROOT_DIR)/scripts/ci/govet.sh
+	$(ROOT_DIR)/scripts/ci/lint.sh
 .PHONY: lint
 
 test:
@@ -70,3 +73,19 @@ test-verbose:
 test-verbose-with-coverage:
 	ginkgo -r -v -cover -race -skipPackage="testdata"
 .PHONY: test-verbose-with-coverage
+
+ci-errcheck:
+	$(ROOT_DIR)/scripts/ci/errcheck.sh
+.PHONY: ci-errcheck
+
+ci-gofmt:
+	$(ROOT_DIR)/scripts/ci/gofmt.sh
+.PHONY: ci-gofmt
+
+ci-govet:
+	$(ROOT_DIR)/scripts/ci/govet.sh
+.PHONY: ci-govet
+
+ci-lint:
+	$(ROOT_DIR)/scripts/ci/lint.sh
+.PHONY: ci-lint

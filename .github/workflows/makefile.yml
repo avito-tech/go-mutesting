@@ -31,8 +31,23 @@ jobs:
         env:
           GO111MODULE: "off"
 
+      - name: Run go errcheck
+        run: make ci-errcheck
+        env:
+          GO111MODULE: "off"
+
+       - name: Run go fmt
+        run: make ci-gofmt
+        env:
+          GO111MODULE: "off"
+
+      - name: Run go vet
+        run: make ci-govet
+        env:
+          GO111MODULE: "off"
+
       - name: Run lint
-        run: make lint
+        run: make ci-lint
         env:
           GO111MODULE: "off"
 
