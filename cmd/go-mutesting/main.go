@@ -21,20 +21,20 @@ import (
 	"strings"
 	"syscall"
 
-	"../../internal/importing"
-	"../../internal/models"
+	"github.com/avito-tech/go-mutesting/internal/importing"
+	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
-	"../.."
-	"../../astutil"
-	"../../mutator"
-	_ "../../mutator/arithmetic"
-	_ "../../mutator/branch"
-	_ "../../mutator/expression"
-	_ "../../mutator/loop"
-	_ "../../mutator/numbers"
-	_ "../../mutator/statement"
+	"github.com/avito-tech/go-mutesting"
+	"github.com/avito-tech/go-mutesting/astutil"
+	"github.com/avito-tech/go-mutesting/mutator"
+	_ "github.com/avito-tech/go-mutesting/mutator/arithmetic"
+	_ "github.com/avito-tech/go-mutesting/mutator/branch"
+	_ "github.com/avito-tech/go-mutesting/mutator/expression"
+	_ "github.com/avito-tech/go-mutesting/mutator/loop"
+	_ "github.com/avito-tech/go-mutesting/mutator/numbers"
+	_ "github.com/avito-tech/go-mutesting/mutator/statement"
 )
 
 const (

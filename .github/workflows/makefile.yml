@@ -9,12 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
+
+      - uses: actions/checkout@v2
+        with:
+          path: '$(GOPATH)/src/github.com/avito-tech/go-mutesting/'
 
       - name: Install dependencies
         run: make install-dependencies
@@ -41,10 +43,10 @@ jobs:
         env:
           GO111MODULE: "off"
 
-#      - name: Run go vet
-#        run: make ci-govet
-#        env:
-#          GO111MODULE: "off"
+      - name: Run go vet
+        run: make ci-govet
+        env:
+          GO111MODULE: "off"
 
       - name: Run lint
         run: make ci-lint
