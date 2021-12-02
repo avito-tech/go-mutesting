@@ -41,10 +41,10 @@ jobs:
         env:
           GO111MODULE: "off"
 
-      - name: Run go vet
-        run: make ci-govet
-        env:
-          GO111MODULE: "off"
+#      - name: Run go vet
+#        run: make ci-govet
+#        env:
+#          GO111MODULE: "off"
 
       - name: Run lint
         run: make ci-lint
