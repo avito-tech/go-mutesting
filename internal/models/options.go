@@ -17,8 +17,8 @@ type Options struct {
 	} `group:"File options"`
 
 	Mutator struct {
-		DisableMutators []string `long:"disable" description:"Disable mutator by their name or using * as a suffix pattern"`
-		ListMutators    bool     `long:"list-mutators" description:"List all available mutators"`
+		DisableMutators []string `long:"disable" description:"Disable mutator by their name or using * as a suffix pattern (in order to check remaining enabled mutators use --verbose option)"`
+		ListMutators    bool     `long:"list-mutators" description:"List all available mutators (including disabled)"`
 	} `group:"Mutator options"`
 
 	Filter struct {
