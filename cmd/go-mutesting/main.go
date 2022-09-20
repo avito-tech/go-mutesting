@@ -303,6 +303,10 @@ MUTATOR:
 
 	verbose(opts, "Save report into %q", models.ReportFileName)
 
+	if report.MsiScore() < opts.Config.MinMsi {
+		return exitError("The MSI %f is less than the minimum allowed value %f", report.MsiScore(), opts.Config.MinMsi)
+	}
+
 	return returnOk
 }
 

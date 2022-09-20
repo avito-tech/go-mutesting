@@ -45,5 +45,6 @@ type Options struct {
 		JSONOutput           bool     `yaml:"json_output"`
 		SilentMode           bool     `yaml:"silent_mode"`
 		ExcludeDirs          []string `yaml:"exclude_dirs"`
+		MinMsi               float64  `yaml:"min_msi"`
 	}
 }
