@@ -197,7 +197,7 @@ MUTATOR:
 		})
 	}
 
-	tmpDir, err := os.CreateTemp("", "go-mutesting-")
+	tmpDir, err := os.MkdirTemp("", "go-mutesting-")
 	if err != nil {
 		panic(err)
 	}
@@ -218,12 +218,12 @@ MUTATOR:
 			return exitError(err.Error())
 		}
 
-		err = os.MkdirAll(tmpDir.Name()+"/"+filepath.Dir(file), 0755)
+		err = os.MkdirAll(tmpDir+"/"+filepath.Dir(file), 0755)
 		if err != nil {
 			panic(err)
 		}
 
-		tmpFile := tmpDir.Name() + "/" + file
+		tmpFile := tmpDir + "/" + file
 
 		originalFile := fmt.Sprintf("%s.original", tmpFile)
 		err = osutil.CopyFile(file, originalFile)
@@ -251,11 +251,11 @@ MUTATOR:
 	}
 
 	if !opts.General.DoNotRemoveTmpFolder {
-		err = os.RemoveAll(tmpDir.Name())
+		err = os.RemoveAll(tmpDir)
 		if err != nil {
 			panic(err)
 		}
-		debug(opts, "Remove %q", tmpDir.Name())
+		debug(opts, "Remove %q", tmpDir)
 	}
 
 	report.Calculate()

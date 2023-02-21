@@ -64,11 +64,11 @@ func TestMainSkipWithoutTest(t *testing.T) {
 }
 
 func TestMainJSONReport(t *testing.T) {
-	tmpDir, err := os.CreateTemp("", "go-mutesting-main-test-")
+	tmpDir, err := os.MkdirTemp("", "go-mutesting-main-test-")
 	assert.NoError(t, err)
 
 	reportFileName := "reportTestMainJSONReport.json"
-	jsonFile := tmpDir.Name() + "/" + reportFileName
+	jsonFile := tmpDir + "/" + reportFileName
 	if _, err := os.Stat(jsonFile); err == nil {
 		err = os.Remove(jsonFile)
 		assert.NoError(t, err)
