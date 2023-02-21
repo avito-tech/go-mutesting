@@ -26,10 +26,7 @@ func MutatorLoopRangeBreak(_ *types.Package, _ *types.Info, node ast.Node) []mut
 
 	newBreakStmt := &ast.BranchStmt{Tok: token.BREAK}
 	newBody.List = append(newBody.List, newBreakStmt)
-
-	for _, nn := range n.Body.List {
-		newBody.List = append(newBody.List, nn)
-	}
+	newBody.List = append(newBody.List, n.Body.List...)
 
 	return []mutator.Mutation{
 		{

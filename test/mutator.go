@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/printer"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +20,7 @@ func Mutator(t *testing.T, m mutator.Mutator, testFile string, count int) {
 	assert.NotNil(t, m)
 
 	// Read the origianl source code
-	data, err := ioutil.ReadFile(testFile)
+	data, err := os.ReadFile(testFile)
 	assert.Nil(t, err)
 
 	// Parse and type-check the original source code
@@ -45,11 +45,11 @@ func Mutator(t *testing.T, m mutator.Mutator, testFile string, count int) {
 		assert.Nil(t, err)
 
 		changedFilename := fmt.Sprintf("%s.%d.go", testFile, i)
-		changedFile, err := ioutil.ReadFile(changedFilename)
+		changedFile, err := os.ReadFile(changedFilename)
 		assert.Nil(t, err)
 
 		if !assert.Equal(t, string(changedFile), buf.String(), fmt.Sprintf("For change file %q", changedFilename)) {
-			err = ioutil.WriteFile(fmt.Sprintf("%s.%d.go.new", testFile, i), buf.Bytes(), 0644)
+			err = os.WriteFile(fmt.Sprintf("%s.%d.go.new", testFile, i), buf.Bytes(), 0644)
 			assert.Nil(t, err)
 		}
 
