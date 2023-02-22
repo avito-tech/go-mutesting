@@ -10,9 +10,7 @@ import (
 	"go/printer"
 	"go/token"
 	"go/types"
-	"gopkg.in/yaml.v3"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -20,6 +18,8 @@ import (
 	"regexp"
 	"strings"
 	"syscall"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
@@ -81,7 +81,7 @@ func checkArguments(args []string, opts *models.Options) (bool, int) {
 	}
 
 	if opts.General.Config != "" {
-		yamlFile, err := ioutil.ReadFile(opts.General.Config)
+		yamlFile, err := os.ReadFile(opts.General.Config)
 		if err != nil {
 			return true, exitError("Could not read config file: %q", opts.General.Config)
 		}
@@ -155,7 +155,7 @@ func mainCmd(args []string) int {
 
 	if len(opts.Files.Blacklist) > 0 {
 		for _, f := range opts.Files.Blacklist {
-			c, err := ioutil.ReadFile(f)
+			c, err := os.ReadFile(f)
 			if err != nil {
 				return exitError("Cannot read blacklist file %q: %v", f, err)
 			}
@@ -197,7 +197,7 @@ MUTATOR:
 		})
 	}
 
-	tmpDir, err := ioutil.TempDir("", "go-mutesting-")
+	tmpDir, err := os.MkdirTemp("", "go-mutesting-")
 	if err != nil {
 		panic(err)
 	}
@@ -333,7 +333,7 @@ func mutate(
 				break
 			}
 
-			originalSourceCode, err := ioutil.ReadFile(originalFile)
+			originalSourceCode, err := os.ReadFile(originalFile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -359,7 +359,7 @@ func mutate(
 
 					debug(opts, "Exited with %d", execExitCode)
 
-					mutatedSourceCode, err := ioutil.ReadFile(mutationFile)
+					mutatedSourceCode, err := os.ReadFile(mutationFile)
 					if err != nil {
 						log.Fatal(err)
 					}
@@ -579,7 +579,7 @@ func saveAST(mutationBlackList map[string]struct{}, file string, fset *token.Fil
 		return "", false, err
 	}
 
-	err = ioutil.WriteFile(file, src, 0666)
+	err = os.WriteFile(file, src, 0666)
 	if err != nil {
 		return "", false, err
 	}

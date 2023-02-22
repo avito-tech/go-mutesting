@@ -226,7 +226,7 @@ func matchPackages(pattern string) []string {
 			}
 			_, err = buildContext.ImportDir(path, 0)
 			if err != nil {
-				if _, noGo := err.(*build.NoGoError); noGo {
+				if _, noGo := err.(*build.NoGoError); noGo { //nolint:gosimple
 					return nil
 				}
 			}

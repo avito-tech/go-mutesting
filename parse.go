@@ -7,15 +7,16 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"golang.org/x/tools/go/loader"
-	"io/ioutil"
+	"os"
 	"path/filepath"
+
+	"golang.org/x/tools/go/loader" //nolint:staticcheck
 )
 
 // ParseFile parses the content of the given file and returns the corresponding ast.File node and its file set for positional information.
 // If a fatal error is encountered the error return argument is not nil.
 func ParseFile(file string) (*ast.File, *token.FileSet, error) {
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return nil, nil, err
 	}

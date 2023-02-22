@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/models"
 	"io"
-	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/avito-tech/go-mutesting/internal/models"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -64,7 +64,7 @@ func TestMainSkipWithoutTest(t *testing.T) {
 }
 
 func TestMainJSONReport(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "go-mutesting-main-test-")
+	tmpDir, err := os.MkdirTemp("", "go-mutesting-main-test-")
 	assert.NoError(t, err)
 
 	reportFileName := "reportTestMainJSONReport.json"
@@ -95,7 +95,7 @@ func TestMainJSONReport(t *testing.T) {
 		}
 	}()
 
-	jsonData, err := ioutil.ReadFile(jsonFile)
+	jsonData, err := os.ReadFile(jsonFile)
 	assert.NoError(t, err)
 
 	var mutationReport models.Report
