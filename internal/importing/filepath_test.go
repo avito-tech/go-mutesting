@@ -2,9 +2,10 @@ package importing
 
 import (
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/models"
 	"os"
 	"testing"
+
+	"github.com/avito-tech/go-mutesting/internal/models"
 
 	"github.com/stretchr/testify/assert"
 )

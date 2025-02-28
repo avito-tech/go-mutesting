@@ -27,15 +27,17 @@ func Mutator(t *testing.T, m mutator.Mutator, testFile string, count int) {
 	src, fset, pkg, info, err := mutesting.ParseAndTypeCheckFile(testFile)
 	assert.Nil(t, err)
 
+	skippedLines := mutesting.Skips(fset, src)
+
 	// Mutate a non relevant node
 	assert.Nil(t, m(pkg, info, src))
 
 	// Count the actual mutations
-	n := mutesting.CountWalk(pkg, info, src, m)
+	n := mutesting.CountWalk(pkg, info, fset, src, m, skippedLines)
 	assert.Equal(t, count, n)
 
 	// Mutate all relevant nodes -> test whole mutation process
-	changed := mutesting.MutateWalk(pkg, info, src, m)
+	changed := mutesting.MutateWalk(pkg, info, fset, src, m, skippedLines)
 
 	for i := 0; i < count; i++ {
 		assert.True(t, <-changed)

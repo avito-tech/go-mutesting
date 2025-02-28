@@ -3,20 +3,24 @@ package mutesting
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 
 	"github.com/avito-tech/go-mutesting/mutator"
 )
 
-// CountWalk returns the number of corresponding mutations for a given mutator.
-// It traverses the AST of the given node and calls the method Check of the given mutator for every node and sums up the returned counts. After completion of the traversal the final counter is returned.
-func CountWalk(pkg *types.Package, info *types.Info, node ast.Node, m mutator.Mutator) int {
+// CountWalk returns the number of corresponding mutations for a given mutator. It traverses the AST of the given node
+// and calls the method Check of the given mutator for every node and sums up the returned counts. After completion of
+// the traversal the final counter is returned.
+func CountWalk(pkg *types.Package, info *types.Info, fset *token.FileSet, node ast.Node, m mutator.Mutator, skippedLines map[int]struct{}) int {
 	w := &countWalk{
 		count:   0,
 		mutator: m,
 		pkg:     pkg,
 		info:    info,
+		fset:    fset,
+		skipped: skippedLines,
 	}
 
 	ast.Walk(w, node)
@@ -29,6 +33,8 @@ type countWalk struct {
 	mutator mutator.Mutator
 	pkg     *types.Package
 	info    *types.Info
+	fset    *token.FileSet
+	skipped map[int]struct{}
 }
 
 // Visit implements the Visit method of the ast.Visitor interface
@@ -37,19 +43,27 @@ func (w *countWalk) Visit(node ast.Node) ast.Visitor {
 		return w
 	}
 
-	w.count += len(w.mutator(w.pkg, w.info, node))
+	line := w.fset.Position(node.Pos()).Line
+	_, ok := w.skipped[line]
+	if !ok {
+		w.count += len(w.mutator(w.pkg, w.info, node))
+	}
 
 	return w
 }
 
-// MutateWalk mutates the given node with the given mutator returning a channel to control the mutation steps.
-// It traverses the AST of the given node and calls the method Check of the given mutator to verify that a node can be mutated by the mutator. If a node can be mutated the method Mutate of the given mutator is executed with the node and the control channel. After completion of the traversal the control channel is closed.
-func MutateWalk(pkg *types.Package, info *types.Info, node ast.Node, m mutator.Mutator) chan bool {
+// MutateWalk mutates the given node with the given mutator returning a channel to control the mutation steps. It
+// traverses the AST of the given node and calls the method Check of the given mutator to verify that a node can be
+// mutated by the mutator. If a node can be mutated the method Mutate of the given mutator is executed with the node and
+// the control channel. After completion of the traversal the control channel is closed.
+func MutateWalk(pkg *types.Package, info *types.Info, fset *token.FileSet, node ast.Node, m mutator.Mutator, skippedLines map[int]struct{}) chan bool {
 	w := &mutateWalk{
 		changed: make(chan bool),
 		mutator: m,
 		pkg:     pkg,
 		info:    info,
+		fset:    fset,
+		skipped: skippedLines,
 	}
 
 	go func() {
@@ -66,11 +80,19 @@ type mutateWalk struct {
 	mutator mutator.Mutator
 	pkg     *types.Package
 	info    *types.Info
+	fset    *token.FileSet
+	skipped map[int]struct{}
 }
 
 // Visit implements the Visit method of the ast.Visitor interface
 func (w *mutateWalk) Visit(node ast.Node) ast.Visitor {
 	if node == nil {
+		return w
+	}
+
+	line := w.fset.Position(node.Pos()).Line
+	_, ok := w.skipped[line]
+	if ok {
 		return w
 	}
 

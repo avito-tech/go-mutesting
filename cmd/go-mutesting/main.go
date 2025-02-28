@@ -321,10 +321,12 @@ func mutate(
 	execs []string,
 	stats *models.Report,
 ) int {
+	skippedLines := mutesting.Skips(fset, src.(*ast.File))
+
 	for _, m := range mutators {
 		debug(opts, "Mutator %s", m.Name)
 
-		changed := mutesting.MutateWalk(pkg, info, node, m.Mutator)
+		changed := mutesting.MutateWalk(pkg, info, fset, node, m.Mutator, skippedLines)
 
 		for {
 			_, ok := <-changed

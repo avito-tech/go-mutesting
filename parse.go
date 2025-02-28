@@ -9,6 +9,7 @@ import (
 	"go/types"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/tools/go/loader" //nolint:staticcheck
 )
@@ -80,4 +81,16 @@ func ParseAndTypeCheckFile(file string) (*ast.File, *token.FileSet, *types.Packa
 	}
 
 	return src, prog.Fset, pkgInfo.Pkg, &pkgInfo.Info, nil
+}
+
+// Skips checks all comments and finds `//nomutesting` directives.
+func Skips(fset *token.FileSet, f *ast.File) map[int]struct{} {
+	skippedLines := make(map[int]struct{})
+	for _, g := range f.Comments {
+		text := strings.TrimLeft(g.Text(), "/ ")
+		if strings.HasPrefix(text, "nomutesting") {
+			skippedLines[fset.Position(g.Pos()).Line] = struct{}{}
+		}
+	}
+	return skippedLines
 }
