@@ -37,21 +37,21 @@ install:
 
 install-dependencies:
 	go get -t -v $(PKG)/...
-	go test -i -v $(PKG)/...
+	go test -v $(PKG)/...
 .PHONY: install-dependencies
 
 install-tools:
 	# generation
-	go get -u -v golang.org/x/tools/cmd/stringer
+	go install golang.org/x/tools/cmd/stringer
 
 	# linting
-	go get -u -v golang.org/x/lint/golint/...
-	go get -u -v github.com/kisielk/errcheck/...
+	go install golang.org/x/lint/golint@latest
+	go install github.com/kisielk/errcheck@latest
 
 	# code coverage
-	go get -u -v github.com/onsi/ginkgo/ginkgo/...
-	go get -u -v github.com/modocache/gover/...
-	go get -u -v github.com/mattn/goveralls/...
+	go install github.com/onsi/ginkgo/ginkgo@latest
+	go install github.com/modocache/gover@latest
+	go install github.com/mattn/goveralls@latest
 .PHONY: install-tools
 
 lint: ci-errcheck ci-gofmt ci-govet ci-lint
