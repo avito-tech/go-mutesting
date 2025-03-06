@@ -46,12 +46,12 @@ install-tools:
 
 	# linting
 	go install golang.org/x/lint/golint@latest
-	go install github.com/kisielk/errcheck/...
+	go install github.com/kisielk/errcheck@latest
 
 	# code coverage
 	go install github.com/onsi/ginkgo/ginkgo@latest
-	go install github.com/modocache/gover/...
-	go install github.com/mattn/goveralls/...
+	go install github.com/modocache/gover@latest
+	go install github.com/mattn/goveralls@latest
 .PHONY: install-tools
 
 lint: ci-errcheck ci-gofmt ci-govet ci-lint
