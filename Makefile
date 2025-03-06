@@ -3,6 +3,7 @@
 export ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 export PKG := github.com/avito-tech/go-mutesting
 export ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+export PATH_TO_GO_BINARY := $(echo $GOPATH)/bin
 
 export TEST_TIMEOUT_IN_SECONDS := 240
 
