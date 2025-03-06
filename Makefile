@@ -45,8 +45,9 @@ install-tools:
 	go install golang.org/x/tools/cmd/stringer
 
 	# linting
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install golang.org/x/lint/golint@latest
 	go install github.com/kisielk/errcheck/...
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 
 	# code coverage
 	go install github.com/onsi/ginkgo/ginkgo/...
