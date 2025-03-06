@@ -45,7 +45,6 @@ install-tools:
 	go install golang.org/x/tools/cmd/stringer
 
 	# linting
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install golang.org/x/lint/golint@latest
 	go install github.com/kisielk/errcheck/...
 
