@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GOPATH: ${{ github.workspace }}
+      PATH: ${{ env.PATH }}:${{ env.GOPATH }}/bin
     defaults:
       run:
         working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
