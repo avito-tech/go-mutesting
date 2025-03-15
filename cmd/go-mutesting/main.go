@@ -21,6 +21,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/avito-tech/go-mutesting/internal/console"
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/jessevdk/go-flags"
@@ -371,7 +372,7 @@ func mutate(
 					case 0: // Tests failed - all ok
 						out := fmt.Sprintf("PASS %s\n", msg)
 						if !opts.Config.SilentMode {
-							fmt.Print(out)
+							console.PrintPass(out)
 						}
 
 						mutant.ProcessOutput = out
@@ -380,7 +381,7 @@ func mutate(
 					case 1: // Tests passed
 						out := fmt.Sprintf("FAIL %s\n", msg)
 						if !opts.Config.SilentMode {
-							fmt.Print(out)
+							console.PrintFail(out)
 						}
 
 						mutant.ProcessOutput = out
@@ -389,7 +390,7 @@ func mutate(
 					case 2: // Did not compile
 						out := fmt.Sprintf("SKIP %s\n", msg)
 						if !opts.Config.SilentMode {
-							fmt.Print(out)
+							console.PrintSkip(out)
 						}
 
 						mutant.ProcessOutput = out
@@ -397,7 +398,7 @@ func mutate(
 					default:
 						out := fmt.Sprintf("UNKOWN exit code for %s\n", msg)
 						if !opts.Config.SilentMode {
-							fmt.Print(out)
+							console.PrintUnknown(out)
 						}
 
 						mutant.ProcessOutput = out
@@ -485,13 +486,13 @@ func mutateExec(
 		switch execExitCode {
 		case 0: // Tests passed -> FAIL
 			if !opts.Config.SilentMode {
-				fmt.Printf("%s\n", diff)
+				console.PrintDiffWithColors(diff)
 			}
 
 			execExitCode = 1
 		case 1: // Tests failed -> PASS
 			if opts.General.Debug {
-				fmt.Printf("%s\n", diff)
+				console.PrintDiffWithColors(diff)
 			}
 
 			execExitCode = 0
@@ -501,12 +502,12 @@ func mutateExec(
 			}
 
 			if opts.General.Debug {
-				fmt.Printf("%s\n", diff)
+				console.PrintDiffWithColors(diff)
 			}
 		default: // Unknown exit code -> SKIP
 			if !opts.Config.SilentMode {
 				fmt.Println("Unknown exit code")
-				fmt.Printf("%s\n", diff)
+				console.PrintDiffWithColors(diff)
 			}
 		}
 
