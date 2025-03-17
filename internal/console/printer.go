@@ -8,11 +8,12 @@ import (
 	"github.com/fatih/color"
 )
 
+// for colouring
 const (
-	PASS    = "PASS"    // good
-	FAIL    = "FAIL"    // not good
-	SKIP    = "SKIP"    // tests skipped
-	UNKNOWN = "UNKNOWN" // unknown exit code
+	PASS    = "PASS"
+	FAIL    = "FAIL"
+	SKIP    = "SKIP"
+	UNKNOWN = "UNKNOWN"
 )
 
 var (
