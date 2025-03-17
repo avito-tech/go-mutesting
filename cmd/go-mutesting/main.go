@@ -486,13 +486,13 @@ func mutateExec(
 		switch execExitCode {
 		case 0: // Tests passed -> FAIL
 			if !opts.Config.SilentMode {
-				console.PrintDiffWithColors(diff)
+				console.PrintDiff(diff)
 			}
 
 			execExitCode = 1
 		case 1: // Tests failed -> PASS
 			if opts.General.Debug {
-				console.PrintDiffWithColors(diff)
+				console.PrintDiff(diff)
 			}
 
 			execExitCode = 0
@@ -502,12 +502,12 @@ func mutateExec(
 			}
 
 			if opts.General.Debug {
-				console.PrintDiffWithColors(diff)
+				console.PrintDiff(diff)
 			}
 		default: // Unknown exit code -> SKIP
 			if !opts.Config.SilentMode {
 				fmt.Println("Unknown exit code")
-				console.PrintDiffWithColors(diff)
+				console.PrintDiff(diff)
 			}
 		}
 

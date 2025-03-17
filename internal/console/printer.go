@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	PASS    = "PASS"
-	FAIL    = "FAIL"
-	SKIP    = "SKIP"
-	UNKNOWN = "UNKNOWN"
+	PASS    = "PASS"    // good
+	FAIL    = "FAIL"    // not good
+	SKIP    = "SKIP"    // tests skipped
+	UNKNOWN = "UNKNOWN" // unknown exit code
 )
 
 var (
@@ -20,6 +20,7 @@ var (
 	frameLine = strings.Repeat("-", length)
 )
 
+// PrintPass prints in green
 func PrintPass(out string) {
 	pass := color.New(color.FgHiWhite, color.BgGreen).SprintfFunc()
 	out = strings.Replace(out, PASS, pass(PASS), 1)
@@ -27,6 +28,7 @@ func PrintPass(out string) {
 	color.Blue(frameLine)
 }
 
+// PrintFail prints in red
 func PrintFail(out string) {
 	fail := color.New(color.FgHiWhite, color.BgRed).SprintfFunc()
 	out = strings.Replace(out, FAIL, fail(FAIL), 1)
@@ -34,6 +36,7 @@ func PrintFail(out string) {
 	color.Blue(frameLine)
 }
 
+// PrintSkip prints in yellow
 func PrintSkip(out string) {
 	skip := color.New(color.FgHiWhite, color.BgYellow).SprintfFunc()
 	out = strings.Replace(out, SKIP, skip(SKIP), 1)
@@ -41,6 +44,7 @@ func PrintSkip(out string) {
 	color.Blue(frameLine)
 }
 
+// PrintUnknown prints in magenta
 func PrintUnknown(out string) {
 	unknown := color.New(color.FgHiWhite, color.BgMagenta).SprintfFunc()
 	out = strings.Replace(out, UNKNOWN, unknown(UNKNOWN), 1)
@@ -48,7 +52,8 @@ func PrintUnknown(out string) {
 	color.Blue(frameLine)
 }
 
-func PrintDiffWithColors(diff []byte) {
+// PrintDiff prints colorful diff
+func PrintDiff(diff []byte) {
 	green := color.New(color.FgHiWhite).Add(color.BgGreen)
 	red := color.New(color.FgHiWhite).Add(color.BgRed)
 
