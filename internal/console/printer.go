@@ -2,6 +2,7 @@ package console
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/fatih/color"
@@ -55,13 +56,25 @@ func PrintDiffWithColors(diff []byte) {
 	for _, line := range strings.Split(lines, "\n") {
 		switch {
 		case strings.HasPrefix(line, "+++"):
-			green.Println(line)
+			_, err := green.Println(line)
+			if err != nil {
+				log.Printf("Error printing output: %s", err)
+			}
 		case strings.HasPrefix(line, "---"):
-			red.Println(line)
+			_, err := red.Println(line)
+			if err != nil {
+				log.Printf("Error printing output: %s", err)
+			}
 		case strings.HasPrefix(line, "+"):
-			green.Println(line)
+			_, err := green.Println(line)
+			if err != nil {
+				log.Printf("Error printing output: %s", err)
+			}
 		case strings.HasPrefix(line, "-"):
-			red.Println(line)
+			_, err := red.Println(line)
+			if err != nil {
+				log.Printf("Error printing output: %s", err)
+			}
 		default:
 			fmt.Println(line)
 		}
