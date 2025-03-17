@@ -15,8 +15,14 @@ func init() {
 
 // MutatorNumbersDecrementer implements a mutator to decrement int and float.
 func MutatorNumbersDecrementer(_ *types.Package, _ *types.Info, node ast.Node) []mutator.Mutation {
+	skipMutationForMake(node)
+
 	n, ok := node.(*ast.BasicLit)
 	if !ok {
+		return nil
+	}
+
+	if _, found := globalParentMap[n.Pos()]; found {
 		return nil
 	}
 
