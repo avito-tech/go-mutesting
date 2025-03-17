@@ -102,10 +102,13 @@ The execution will print the following output.
 
 > **Note**: This output is from an older version of go-mutesting. Up to date versions of go-mutesting will have different mutations.
 
+<pre>
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span>  "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.0" with checksum b705f4c99e6d572de509609eb0a625be
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span>  "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.1" with checksum eb54efffc5edfc7eba2b276371b29836
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span>  "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.2" with checksum 011df9567e5fee9bf75cbe5d5dc1c81f
+</pre>
+
 ```diff
-PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.0" with checksum b705f4c99e6d572de509609eb0a625be
-PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.1" with checksum eb54efffc5edfc7eba2b276371b29836
-PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.2" with checksum 011df9567e5fee9bf75cbe5d5dc1c81f
 --- Original
 +++ New
 @@ -16,7 +16,7 @@
@@ -117,9 +120,15 @@ PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/
         }
 
         n++
-FAIL "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.3" with checksum 82fc14acf7b561598bfce25bf3a162a2
-PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.4" with checksum 5720f1bf404abea121feb5a50caf672c
-PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.5" with checksum d6c1b5e25241453128f9f3bf1b9e7741
+```
+
+<pre>
+<span style="background-color: #ff0000; color: #ffffff; padding: 1px 1px; ">FAIL</span> "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.3" with checksum 82fc14acf7b561598bfce25bf3a162a2
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.4" with checksum 5720f1bf404abea121feb5a50caf672c
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.5" with checksum d6c1b5e25241453128f9f3bf1b9e7741
+</pre>
+
+```diff
 --- Original
 +++ New
 @@ -24,7 +24,6 @@
@@ -130,10 +139,13 @@ PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/
 
         return n
  }
-FAIL "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.6" with checksum 5b1ca0cfedd786d9df136a0e042df23a
-PASS "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.8" with checksum 6928f4458787c7042c8b4505888300a6
-The mutation score is 0.750000 (6 passed, 2 failed, 0 skipped, total is 8)
 ```
+
+<pre>
+<span style="background-color: #ff0000; color: #ffffff; padding: 1px 1px; ">FAIL</span> "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.6" with checksum 5b1ca0cfedd786d9df136a0e042df23a
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-422402775//home/avito-tech/go/src/github.com/avito-tech/go-mutesting/example/example.go.8" with checksum 6928f4458787c7042c8b4505888300a6
+The mutation score is 0.750000 (6 passed, 2 failed, 0 skipped, total is 8)
+</pre>
 
 The output shows that eight mutations have been found and tested. Six of them passed which means that the test suite failed for these mutations and the mutations were therefore killed. However, two mutations did not fail the test suite. Their source code patches are shown in the output which can be used to investigate these mutations.
 
@@ -161,10 +173,13 @@ The execution will print the following output.
 
 > **Note**: This output is from an older version of go-mutesting. Up to date versions of go-mutesting will have different mutations.
 
+<pre>
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-208240643/example.go.0" with checksum b705f4c99e6d572de509609eb0a625be
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-208240643/example.go.1" with checksum eb54efffc5edfc7eba2b276371b29836
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-208240643/example.go.2" with checksum 011df9567e5fee9bf75cbe5d5dc1c81f
+</pre>
+
 ```diff
-PASS "/tmp/go-mutesting-208240643/example.go.0" with checksum b705f4c99e6d572de509609eb0a625be
-PASS "/tmp/go-mutesting-208240643/example.go.1" with checksum eb54efffc5edfc7eba2b276371b29836
-PASS "/tmp/go-mutesting-208240643/example.go.2" with checksum 011df9567e5fee9bf75cbe5d5dc1c81f
 --- Original
 +++ New
 @@ -16,7 +16,7 @@
@@ -176,12 +191,15 @@ PASS "/tmp/go-mutesting-208240643/example.go.2" with checksum 011df9567e5fee9bf7
         }
 
         n++
-FAIL "/tmp/go-mutesting-208240643/example.go.3" with checksum 82fc14acf7b561598bfce25bf3a162a2
-PASS "/tmp/go-mutesting-208240643/example.go.4" with checksum 5720f1bf404abea121feb5a50caf672c
-PASS "/tmp/go-mutesting-208240643/example.go.5" with checksum d6c1b5e25241453128f9f3bf1b9e7741
-PASS "/tmp/go-mutesting-208240643/example.go.8" with checksum 6928f4458787c7042c8b4505888300a6
-The mutation score is 0.857143 (6 passed, 1 failed, 0 skipped, total is 7)
 ```
+
+<pre>
+<span style="background-color: #ff0000; color: #ffffff; padding: 1px 1px; ">FAIL</span> "/tmp/go-mutesting-208240643/example.go.3" with checksum 82fc14acf7b561598bfce25bf3a162a2
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-208240643/example.go.4" with checksum 5720f1bf404abea121feb5a50caf672c
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-208240643/example.go.5" with checksum d6c1b5e25241453128f9f3bf1b9e7741
+<span style="background-color: #50C878; color: #ffffff; padding: 1px 1px; ">PASS</span> "/tmp/go-mutesting-208240643/example.go.8" with checksum 6928f4458787c7042c8b4505888300a6
+The mutation score is 0.857143 (6 passed, 1 failed, 0 skipped, total is 7)
+</pre>
 
 By comparing this output to the original output we can state that we now have 7 mutations instead of 8.
 
