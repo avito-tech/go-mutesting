@@ -65,13 +65,13 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 				t.Fatalf("Failed to parse code: %v", err)
 			}
 
-			globalParentMap = make(map[token.Pos]*ast.CallExpr)
-			skipMutationForMake(node)
+			ignoredNodes = make(map[token.Pos]*ast.CallExpr)
+			skipMutationForMakeArgs(node)
 
 			var result bool
 			ast.Inspect(node, func(n ast.Node) bool {
 				if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.INT {
-					_, found := globalParentMap[lit.Pos()]
+					_, found := ignoredNodes[lit.Pos()]
 					result = found
 					return false
 				}
