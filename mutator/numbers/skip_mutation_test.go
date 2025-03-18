@@ -15,9 +15,8 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "skip mutation for slice init with len",
-			code: `package main; 
-					   var a = make([]int, 10)`,
+			name:     "skip mutation for slice init with len",
+			code:     `package main; var a = make([]int, 10)`,
 			expected: true,
 		},
 		{
