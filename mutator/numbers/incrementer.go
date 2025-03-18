@@ -15,8 +15,14 @@ func init() {
 
 // MutatorNumbersIncrementer implements a mutator to increment int and float.
 func MutatorNumbersIncrementer(_ *types.Package, _ *types.Info, node ast.Node) []mutator.Mutation {
+	skipMutationForMakeArgs(node)
+
 	n, ok := node.(*ast.BasicLit)
 	if !ok {
+		return nil
+	}
+
+	if _, found := ignoredNodes[n.Pos()]; found {
 		return nil
 	}
 
