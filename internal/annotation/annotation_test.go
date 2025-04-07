@@ -13,25 +13,25 @@ import (
 func TestShouldSkipMutator(t *testing.T) {
 	tests := []struct {
 		name        string
-		mutatorInfo MutatorInfo
+		mutatorInfo mutatorInfo
 		mutatorName string
 		expected    bool
 	}{
 		{
 			name:        "Mutator matches exactly",
-			mutatorInfo: MutatorInfo{Names: []string{"MutatorA", "MutatorB"}},
+			mutatorInfo: mutatorInfo{Names: []string{"MutatorA", "MutatorB"}},
 			mutatorName: "MutatorA",
 			expected:    true,
 		},
 		{
 			name:        "Mutator matches wildcard",
-			mutatorInfo: MutatorInfo{Names: []string{"*"}},
+			mutatorInfo: mutatorInfo{Names: []string{"*"}},
 			mutatorName: "AnyMutator",
 			expected:    true,
 		},
 		{
 			name:        "Mutator does not match",
-			mutatorInfo: MutatorInfo{Names: []string{"MutatorA", "MutatorB"}},
+			mutatorInfo: mutatorInfo{Names: []string{"MutatorA", "MutatorB"}},
 			mutatorName: "MutatorC",
 			expected:    false,
 		},
@@ -100,7 +100,7 @@ func TestParseRegexAnnotation(t *testing.T) {
 		name          string
 		commentText   string
 		expectedRegex *regexp.Regexp
-		expectedInfo  MutatorInfo
+		expectedInfo  mutatorInfo
 	}{
 		{
 			name:        "Valid regex and mutators",
@@ -109,7 +109,7 @@ func TestParseRegexAnnotation(t *testing.T) {
 				re, _ := regexp.Compile("^[a-z]+$")
 				return re
 			}(),
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{"MutatorA", "MutatorB"},
 			},
 		},
@@ -120,7 +120,7 @@ func TestParseRegexAnnotation(t *testing.T) {
 				re, _ := regexp.Compile("^[0-9]{4}$")
 				return re
 			}(),
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{},
 			},
 		},
@@ -128,13 +128,13 @@ func TestParseRegexAnnotation(t *testing.T) {
 			name:          "Invalid regex",
 			commentText:   "RegexName [a-z",
 			expectedRegex: nil,
-			expectedInfo:  MutatorInfo{},
+			expectedInfo:  mutatorInfo{},
 		},
 		{
 			name:          "Empty comment",
 			commentText:   "RegexName ",
 			expectedRegex: nil,
-			expectedInfo:  MutatorInfo{},
+			expectedInfo:  mutatorInfo{},
 		},
 	}
 
@@ -165,47 +165,47 @@ func TestParseLineAnnotation(t *testing.T) {
 	tests := []struct {
 		name         string
 		commentText  string
-		expectedInfo MutatorInfo
+		expectedInfo mutatorInfo
 	}{
 		{
 			name:        "Valid mutators",
 			commentText: "LineName MutatorA, MutatorB, MutatorC",
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{"MutatorA", "MutatorB", "MutatorC"},
 			},
 		},
 		{
 			name:        "Single mutator",
 			commentText: "LineName MutatorA",
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{"MutatorA"},
 			},
 		},
 		{
 			name:        "Multiple mutators with spaces",
 			commentText: "LineName  MutatorA, MutatorB , MutatorC  ",
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{"MutatorA", "MutatorB", "MutatorC"},
 			},
 		},
 		{
 			name:        "Empty comment",
 			commentText: "LineName ",
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{},
 			},
 		},
 		{
 			name:        "Only spaces in mutators",
 			commentText: "LineName ,,,",
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{},
 			},
 		},
 		{
 			name:        "Empty mutators",
 			commentText: "LineName",
-			expectedInfo: MutatorInfo{
+			expectedInfo: mutatorInfo{
 				Names: []string{},
 			},
 		},
@@ -439,7 +439,7 @@ func TestCollect(t *testing.T) {
 	})
 
 	assert.NotEmpty(t, processor.RegexAnnotation.Exclusions)
-	assert.Equal(t, processor.RegexAnnotation.Exclusions, map[int]map[token.Pos]MutatorInfo{
+	assert.Equal(t, processor.RegexAnnotation.Exclusions, map[int]map[token.Pos]mutatorInfo{
 		14: {
 			169: {Names: []string{"*"}},
 			173: {Names: []string{"*"}},
@@ -458,7 +458,7 @@ func TestCollect(t *testing.T) {
 	})
 
 	assert.NotEmpty(t, processor.LineAnnotation.Exclusions)
-	assert.Equal(t, processor.LineAnnotation.Exclusions, map[int]map[token.Pos]MutatorInfo{
+	assert.Equal(t, processor.LineAnnotation.Exclusions, map[int]map[token.Pos]mutatorInfo{
 		19: {
 			275: {Names: []string{"numbers/incrementer"}},
 			279: {Names: []string{"numbers/incrementer"}},

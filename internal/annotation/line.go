@@ -7,20 +7,20 @@ import (
 )
 
 type LineAnnotation struct {
-	Exclusions map[int]map[token.Pos]MutatorInfo
+	Exclusions map[int]map[token.Pos]mutatorInfo
 	Name       string
 }
 
 // parseLineAnnotation parses a comment line containing a next-line annotation.
-func (l *LineAnnotation) parseLineAnnotation(comment string) MutatorInfo {
+func (l *LineAnnotation) parseLineAnnotation(comment string) mutatorInfo {
 	content := strings.TrimSpace(strings.TrimPrefix(comment, l.Name))
 	if content == "" {
-		return MutatorInfo{}
+		return mutatorInfo{}
 	}
 
 	mutators := parseMutators(content)
 
-	return MutatorInfo{
+	return mutatorInfo{
 		Names: mutators,
 	}
 }

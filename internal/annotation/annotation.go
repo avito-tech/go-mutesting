@@ -24,23 +24,24 @@ type Processor struct {
 	LineAnnotation     LineAnnotation
 }
 
+// NewProcessor creates and returns a new initialized Processor.
 func NewProcessor() *Processor {
 	return &Processor{
 		FunctionAnnotation: FunctionAnnotation{
 			Exclusions: make(map[token.Pos]struct{}), // *ast.FuncDecl node + all its children
 			Name:       FuncAnnotation},
 		RegexAnnotation: RegexAnnotation{
-			Exclusions: make(map[int]map[token.Pos]MutatorInfo), // source code line -> node -> excluded mutators
+			Exclusions: make(map[int]map[token.Pos]mutatorInfo), // source code line -> node -> excluded mutators
 			Name:       RegexpAnnotation,
 		},
 		LineAnnotation: LineAnnotation{
-			Exclusions: make(map[int]map[token.Pos]MutatorInfo), // source code line -> node -> excluded mutators
+			Exclusions: make(map[int]map[token.Pos]mutatorInfo), // source code line -> node -> excluded mutators
 			Name:       NextLineAnnotation,
 		},
 	}
 }
 
-type MutatorInfo struct {
+type mutatorInfo struct {
 	Names []string
 }
 
@@ -107,8 +108,8 @@ func collectExcludedNodes(
 	fileSet *token.FileSet,
 	file *ast.File,
 	lines []int,
-	excludedNodes map[int]map[token.Pos]MutatorInfo,
-	mutators MutatorInfo) {
+	excludedNodes map[int]map[token.Pos]mutatorInfo,
+	mutators mutatorInfo) {
 	ast.Inspect(file, func(n ast.Node) bool {
 		if n == nil {
 			return true
@@ -119,7 +120,7 @@ func collectExcludedNodes(
 		for _, line := range lines {
 			if startLine == line || endLine == line {
 				if _, exists := excludedNodes[line]; !exists {
-					excludedNodes[line] = make(map[token.Pos]MutatorInfo)
+					excludedNodes[line] = make(map[token.Pos]mutatorInfo)
 				}
 				excludedNodes[line][n.Pos()] = mutators
 			}
@@ -134,9 +135,9 @@ func collectExcludedNodes(
 // This is a tactical solution to handle edge cases where mutators only look at nodes inside block statements.
 // A more robust architectural solution should be implemented in future versions.
 func (p *Processor) collectNodesForBlockStmt() {
-	CleanupGlobalStatBlock()
-	p.RegexAnnotation.CopyToStatNodesInBlock()
-	p.LineAnnotation.CopyToStatNodesInBlock()
+	cleanupGlobalStatBlock()
+	p.RegexAnnotation.copyToStatNodesInBlock()
+	p.LineAnnotation.copyToStatNodesInBlock()
 }
 
 // parseMutators parses a comma-separated string of mutator names into a clean slice of strings.
@@ -155,7 +156,7 @@ func parseMutators(mutatorList string) []string {
 }
 
 // shouldSkipMutator determines whether a specific mutator should be skipped
-func shouldSkipMutator(mutatorInfo MutatorInfo, mutatorName string) bool {
+func shouldSkipMutator(mutatorInfo mutatorInfo, mutatorName string) bool {
 	for _, name := range mutatorInfo.Names {
 		if name == mutatorName || name == "*" {
 			return true

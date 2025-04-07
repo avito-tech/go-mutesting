@@ -11,15 +11,15 @@ import (
 )
 
 type RegexAnnotation struct {
-	Exclusions map[int]map[token.Pos]MutatorInfo
+	Exclusions map[int]map[token.Pos]mutatorInfo
 	Name       string
 }
 
 // parseRegexAnnotation parses a comment line containing a regex annotation.
-func (r *RegexAnnotation) parseRegexAnnotation(comment string) (*regexp.Regexp, MutatorInfo) {
+func (r *RegexAnnotation) parseRegexAnnotation(comment string) (*regexp.Regexp, mutatorInfo) {
 	content := strings.TrimSpace(strings.TrimPrefix(comment, r.Name))
 	if content == "" {
-		return nil, MutatorInfo{}
+		return nil, mutatorInfo{}
 	}
 
 	parts := strings.SplitN(content, " ", 2)
@@ -28,7 +28,7 @@ func (r *RegexAnnotation) parseRegexAnnotation(comment string) (*regexp.Regexp, 
 	re, err := regexp.Compile(pattern)
 	if err != nil {
 		log.Printf("Warning: invalid regex in annotation: %q, error: %v\n", pattern, err)
-		return nil, MutatorInfo{}
+		return nil, mutatorInfo{}
 	}
 
 	mutators := make([]string, 0)
@@ -36,7 +36,7 @@ func (r *RegexAnnotation) parseRegexAnnotation(comment string) (*regexp.Regexp, 
 		mutators = parseMutators(parts[1])
 	}
 
-	return re, MutatorInfo{
+	return re, mutatorInfo{
 		Names: mutators,
 	}
 }
