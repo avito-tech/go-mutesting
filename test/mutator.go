@@ -3,6 +3,9 @@ package test
 import (
 	"bytes"
 	"fmt"
+	"github.com/avito-tech/go-mutesting/internal/annotation"
+	"github.com/avito-tech/go-mutesting/internal/filter"
+	"github.com/avito-tech/go-mutesting/internal/parser"
 	"go/printer"
 	"os"
 	"testing"
@@ -19,12 +22,20 @@ func Mutator(t *testing.T, m mutator.Mutator, testFile string, count int) {
 	// Test if mutator is not nil
 	assert.NotNil(t, m)
 
+	annotationProcessor := annotation.NewProcessor()
+	skipFilterProcessor := filter.NewMakeSkipper()
+
+	collectors := []filter.NodeCollector{
+		annotationProcessor,
+		skipFilterProcessor,
+	}
+
 	// Read the origianl source code
 	data, err := os.ReadFile(testFile)
 	assert.Nil(t, err)
 
 	// Parse and type-check the original source code
-	src, fset, pkg, info, err := mutesting.ParseAndTypeCheckFile(testFile)
+	src, fset, pkg, info, err := parser.ParseAndTypeCheckFile(testFile, collectors)
 	assert.Nil(t, err)
 
 	// Mutate a non relevant node
