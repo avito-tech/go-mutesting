@@ -1,11 +1,12 @@
-package numbers
+package filter
 
 import (
-	"github.com/stretchr/testify/assert"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
@@ -65,13 +66,14 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 				t.Fatalf("Failed to parse code: %v", err)
 			}
 
-			ignoredNodes = make(map[token.Pos]*ast.CallExpr)
-			skipMutationForMakeArgs(node)
+			s := NewMakeSkipper()
+			s.Collect(node, nil, "")
+			s.ShouldSkip(node, "")
 
 			var result bool
 			ast.Inspect(node, func(n ast.Node) bool {
 				if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.INT {
-					_, found := ignoredNodes[lit.Pos()]
+					_, found := s.IgnoredNodes[lit.Pos()]
 					result = found
 					return false
 				}

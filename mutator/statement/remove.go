@@ -1,6 +1,7 @@
 package statement
 
 import (
+	"github.com/avito-tech/go-mutesting/internal/annotation"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -14,6 +15,11 @@ func init() {
 }
 
 func checkRemoveStatement(node ast.Stmt) bool {
+	skip := annotation.HandleBlockStmt(node)
+	if skip {
+		return false
+	}
+
 	switch n := node.(type) {
 	case *ast.AssignStmt:
 		if n.Tok != token.DEFINE {

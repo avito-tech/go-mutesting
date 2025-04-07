@@ -2,6 +2,7 @@ package console
 
 import (
 	"fmt"
+	"github.com/avito-tech/go-mutesting/internal/models"
 	"log"
 	"strings"
 
@@ -84,5 +85,17 @@ func PrintDiff(diff []byte) {
 		default:
 			fmt.Println(line)
 		}
+	}
+}
+
+func Debug(opts *models.Options, format string, args ...interface{}) {
+	if opts.General.Debug {
+		fmt.Printf(format+"\n", args...)
+	}
+}
+
+func Verbose(opts *models.Options, format string, args ...interface{}) {
+	if opts.General.Verbose || opts.General.Debug {
+		fmt.Printf(format+"\n", args...)
 	}
 }

@@ -1,4 +1,4 @@
-package mutesting
+package parser
 
 import (
 	"fmt"
@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 
 	"golang.org/x/tools/go/loader" //nolint:staticcheck
+
+	"github.com/avito-tech/go-mutesting/internal/filter"
 )
 
 // ParseFile parses the content of the given file and returns the corresponding ast.File node and its file set for positional information.
@@ -39,7 +41,7 @@ func ParseSource(data interface{}) (*ast.File, *token.FileSet, error) {
 
 // ParseAndTypeCheckFile parses and type-checks the given file, and returns everything interesting about the file.
 // If a fatal error is encountered the error return argument is not nil.
-func ParseAndTypeCheckFile(file string) (*ast.File, *token.FileSet, *types.Package, *types.Info, error) {
+func ParseAndTypeCheckFile(file string, filters []filter.NodeCollector) (*ast.File, *token.FileSet, *types.Package, *types.Info, error) {
 	fileAbs, err := filepath.Abs(file)
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("Could not absolute the file path of %q: %v", file, err)
@@ -76,6 +78,12 @@ func ParseAndTypeCheckFile(file string) (*ast.File, *token.FileSet, *types.Packa
 			src = f
 
 			break
+		}
+	}
+
+	if src != nil {
+		for _, c := range filters {
+			c.Collect(src, prog.Fset, fileAbs)
 		}
 	}
 
