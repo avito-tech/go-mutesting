@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// LineAnnotation represents a collection of exclusions based on lines in the file.
 type LineAnnotation struct {
 	Exclusions map[int]map[token.Pos]mutatorInfo
 	Name       string

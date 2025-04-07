@@ -88,12 +88,14 @@ func PrintDiff(diff []byte) {
 	}
 }
 
+// Debug prints formatted debug messages when debug mode is enabled in options.
 func Debug(opts *models.Options, format string, args ...interface{}) {
 	if opts.General.Debug {
 		fmt.Printf(format+"\n", args...)
 	}
 }
 
+// Verbose prints formatted messages when either verbose or debug mode is enabled.
 func Verbose(opts *models.Options, format string, args ...interface{}) {
 	if opts.General.Verbose || opts.General.Debug {
 		fmt.Printf(format+"\n", args...)

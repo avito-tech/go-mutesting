@@ -12,6 +12,7 @@ type SkipMakeFilter struct {
 	IgnoredNodes map[token.Pos]*ast.CallExpr
 }
 
+// NewMakeSkipper creates and returns a new initialized Processor.
 func NewMakeSkipper() *SkipMakeFilter {
 	return &SkipMakeFilter{IgnoredNodes: make(map[token.Pos]*ast.CallExpr)}
 }

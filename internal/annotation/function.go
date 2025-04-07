@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// FunctionAnnotation represents a collection of exclusions of function declarations.
 type FunctionAnnotation struct {
 	Exclusions map[token.Pos]struct{}
 	Name       string
