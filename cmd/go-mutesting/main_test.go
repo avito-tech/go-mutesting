@@ -167,3 +167,67 @@ func testMain(t *testing.T, root string, exec []string, expectedExitCode int, co
 	assert.Equal(t, expectedExitCode, exitCode)
 	assert.Contains(t, out, contains)
 }
+
+func TestParseDiffOutput(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []int64
+	}{
+		{
+			name: "single line change",
+			input: `--- Original
+					+++ New
+					@@ -3 +3 @@
+					-old line
+					+new line`,
+			expected: []int64{3},
+		},
+		{
+			name: "multiple changes",
+			input: `--- Original
+					+++ New
+					@@ -5 +5 @@
+					-first change
+					+first new
+					@@ -10,2 +10,2 @@
+					-second change
+					-third change
+					+second new
+					+third new`,
+			expected: []int64{5, 10},
+		},
+		{
+			name: "with line counts",
+			input: `@@ -15,3 +15,3 @@
+					-multi
+					-line
+					-change
+					+multi
+					+line
+					+new`,
+			expected: []int64{15},
+		},
+		{
+			name:     "empty input",
+			input:    "",
+			expected: []int64{},
+		},
+		{
+			name: "invalid line numbers",
+			input: `@@ -abc +def @@
+					-garbage
+					+garbage`,
+			expected: []int64{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := parseDiffOutput(tt.input)
+			if !assert.Equal(t, got, tt.expected) {
+				t.Errorf("parseDiffOutput() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
