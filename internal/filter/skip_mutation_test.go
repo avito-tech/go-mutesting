@@ -66,7 +66,7 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 				t.Fatalf("Failed to parse code: %v", err)
 			}
 
-			s := NewMakeSkipper()
+			s := NewSkipMakeArgsFilter()
 			s.Collect(node, nil, "")
 			s.ShouldSkip(node, "")
 
