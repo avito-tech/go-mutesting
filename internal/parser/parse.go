@@ -41,7 +41,7 @@ func ParseSource(data interface{}) (*ast.File, *token.FileSet, error) {
 
 // ParseAndTypeCheckFile parses and type-checks the given file, and returns everything interesting about the file.
 // If a fatal error is encountered the error return argument is not nil.
-func ParseAndTypeCheckFile(file string, filters []filter.NodeCollector) (*ast.File, *token.FileSet, *types.Package, *types.Info, error) {
+func ParseAndTypeCheckFile(file string, collectors []filter.NodeCollector) (*ast.File, *token.FileSet, *types.Package, *types.Info, error) {
 	fileAbs, err := filepath.Abs(file)
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("Could not absolute the file path of %q: %v", file, err)
@@ -82,7 +82,7 @@ func ParseAndTypeCheckFile(file string, filters []filter.NodeCollector) (*ast.Fi
 	}
 
 	if src != nil {
-		for _, c := range filters {
+		for _, c := range collectors {
 			c.Collect(src, prog.Fset, fileAbs)
 		}
 	}

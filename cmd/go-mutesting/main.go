@@ -206,7 +206,7 @@ MUTATOR:
 		console.Verbose(opts, "Mutate %q", file)
 
 		annotationProcessor := annotation.NewProcessor()
-		skipFilterProcessor := filter.NewMakeSkipper()
+		skipFilterProcessor := filter.NewSkipMakeArgsFilter()
 
 		collectors := []filter.NodeCollector{
 			annotationProcessor,

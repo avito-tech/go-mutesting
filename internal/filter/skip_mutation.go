@@ -5,20 +5,20 @@ import (
 	"go/token"
 )
 
-// SkipMakeFilter is a filter that tracks numeric arguments in 'make' calls
+// SkipMakeArgsFilter is a filter that tracks numeric arguments in 'make' calls
 // for slices and maps to be ignored during mutation.
-type SkipMakeFilter struct {
+type SkipMakeArgsFilter struct {
 	// IgnoredNodes maps positions of numeric literals to their parent 'make' call expressions
 	IgnoredNodes map[token.Pos]*ast.CallExpr
 }
 
-// NewMakeSkipper creates and returns a new initialized Processor.
-func NewMakeSkipper() *SkipMakeFilter {
-	return &SkipMakeFilter{IgnoredNodes: make(map[token.Pos]*ast.CallExpr)}
+// NewSkipMakeArgsFilter creates and returns a new initialized Processor.
+func NewSkipMakeArgsFilter() *SkipMakeArgsFilter {
+	return &SkipMakeArgsFilter{IgnoredNodes: make(map[token.Pos]*ast.CallExpr)}
 }
 
 // Collect collects numeric arguments (children) from 'make' calls (parents) for slices/maps to be ignored during mutation
-func (s *SkipMakeFilter) Collect(file *ast.File, _ *token.FileSet, _ string) {
+func (s *SkipMakeArgsFilter) Collect(file *ast.File, _ *token.FileSet, _ string) {
 	ast.Inspect(file, func(n ast.Node) bool {
 		if callExpr, ok := n.(*ast.CallExpr); ok {
 			if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == "make" && len(callExpr.Args) > 1 {
@@ -43,7 +43,7 @@ func (s *SkipMakeFilter) Collect(file *ast.File, _ *token.FileSet, _ string) {
 }
 
 // ShouldSkip determines whether a given AST node should be skipped during mutation.
-func (s *SkipMakeFilter) ShouldSkip(node ast.Node, _ string) bool {
+func (s *SkipMakeArgsFilter) ShouldSkip(node ast.Node, _ string) bool {
 	_, exists := s.IgnoredNodes[node.Pos()]
 	return exists
 }
