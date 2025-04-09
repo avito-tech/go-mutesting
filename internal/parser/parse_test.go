@@ -11,7 +11,7 @@ import (
 
 func TestParseAndTypeCheckFileTypeCheckWholePackage(t *testing.T) {
 	annotationProcessor := annotation.NewProcessor()
-	skipFilterProcessor := filter.NewMakeSkipper()
+	skipFilterProcessor := filter.NewSkipMakeArgsFilter()
 
 	collectors := []filter.NodeCollector{
 		annotationProcessor,
