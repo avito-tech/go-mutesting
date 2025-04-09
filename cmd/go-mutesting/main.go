@@ -16,7 +16,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"syscall"
 
@@ -25,6 +24,7 @@ import (
 	"github.com/avito-tech/go-mutesting/internal/console"
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
+	"github.com/avito-tech/go-mutesting/internal/parser"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -436,7 +436,7 @@ func mutateExec(
 
 		diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
 
-		changedLines := parseDiffOutput(string(diff))
+		changedLines := parser.ParseDiffOutput(string(diff))
 
 		if len(changedLines) == 0 || len(changedLines) > 1 {
 			mutant.Mutator.OriginalStartLine = 0
@@ -595,33 +595,4 @@ func saveAST(mutationBlackList map[string]struct{}, file string, fset *token.Fil
 	}
 
 	return checksum, false, nil
-}
-
-// parseDiffOutput parses the unified diff (-u) output to extract the line numbers where changes occurred.
-// The `-u` flag provides exactly 3 lines of context around changes, so the actual changed line
-// can be derived by adjusting the reported line number from the diff header.
-func parseDiffOutput(diff string) []int64 {
-	lines := make([]int64, 0)
-	re, err := regexp.Compile(`@@ -(\d+),?\d* \+(\d+),?\d* @@`)
-	if err != nil {
-		return lines
-	}
-
-	matches := re.FindAllStringSubmatch(diff, -1)
-	for _, match := range matches {
-		line, err := strconv.ParseInt(match[1], 10, 64)
-		if err != nil {
-			lines = append(lines, 0)
-		}
-
-		actualLine := line + 3
-		if actualLine > 0 {
-			lines = append(lines, actualLine)
-		} else {
-			lines = append(lines, 0)
-		}
-
-	}
-
-	return lines
 }
