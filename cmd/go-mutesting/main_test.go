@@ -175,38 +175,33 @@ func TestParseDiffOutput(t *testing.T) {
 		expected []int64
 	}{
 		{
-			name: "single line change",
+			name: "single line change 1",
 			input: `--- Original
 					+++ New
-					@@ -3 +3 @@
-					-old line
-					+new line`,
-			expected: []int64{3},
+					@@ -20,7 +20,7 @@
+					}
+ 
+					func doo() {
+					-       ddd := 6
+					+       ddd := 5
+							slog.Info(strconv.Itoa(ddd))
+							fmt.Println("doo")
+					 }`,
+			expected: []int64{23},
 		},
 		{
-			name: "multiple changes",
+			name: "single line change 2",
 			input: `--- Original
 					+++ New
-					@@ -5 +5 @@
-					-first change
-					+first new
-					@@ -10,2 +10,2 @@
-					-second change
-					-third change
-					+second new
-					+third new`,
-			expected: []int64{5, 10},
-		},
-		{
-			name: "with line counts",
-			input: `@@ -15,3 +15,3 @@
-					-multi
-					-line
-					-change
-					+multi
-					+line
-					+new`,
-			expected: []int64{15},
+					@@ -14,7 +14,7 @@
+					 func foo() {
+							jjj := 6
+					-       slog.Info(strconv.Itoa(jjj))
+					+       _, _, _ = slog.Info, strconv.Itoa, jjj
+					 
+							fmt.Println("foo")
+					 }`,
+			expected: []int64{17},
 		},
 		{
 			name:     "empty input",
