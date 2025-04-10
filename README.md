@@ -185,6 +185,86 @@ The mutation score is 0.857143 (6 passed, 1 failed, 0 skipped, total is 7)
 
 By comparing this output to the original output we can state that we now have 7 mutations instead of 8.
 
+### <a name="skip-make-args"></a>Skipping make() arguments mutation
+Problem: Useless and unwanted mutations in make() calls
+
+Before this filter, numeric arguments in make() calls for slices/maps were mutated by incrementer/decrementer mutators, 
+leading to false positives or invalid code:
+
+```bash
+// Original code
+slice := make([]int, 0)  // Capacity argument (0) was mutated
+
+// Mutated versions
+slice := make([]int, 1)  // Incrementer mutation
+slice := make([]int, -1)   // Decrementer mutation
+```
+
+These mutations are almost always irrelevant because:
+
+1. They don't affect logical correctness
+2. Capacity/length arguments are typically well-considered
+3. Tests rarely validate exact allocation sizes
+
+The filter prevents mutations in make() arguments.
+
+### <a name="mutation-annotations"></a>Mutation control via annotations
+
+To further reduce false positives and provide granular control over mutations, 
+go-mutesting now supports special comment annotations. These allow you to exclude specific functions, lines, or patterns from mutation.
+
+#### Annotation Types
+1. ```bash
+   // mutator-disable-func
+   
+Disables all mutations for an entire function.  
+Place this comment above the function declaration.
+
+Example:
+```bash
+// mutator-disable-func  
+func CalculateDiscount(price float64) float64 {  
+    return price * 0.9  
+}
+```
+
+2. ```bash
+   // mutator-disable-next-line <mutator1>, <mutator2>
+
+Disables mutations for the next line of code.  
+Use * to exclude all mutators.  
+Specify mutator names (e.g., branch/case) to exclude selectively.
+
+Example:
+
+```bash
+// mutator-disable-next-line *  
+x = 42  // Fully protected from mutations  
+
+// mutator-disable-next-line branch/if, increment  
+if x > 0 {  // Only branch/if and increment mutators are disabled  
+    y += 1  
+}  
+```
+
+3. ```bash
+   // mutator-disable-regexp <pattern> <mutator1>, <mutator2>
+
+Disables mutations for lines matching a regex pattern.  
+Сan be placed on any line in the file.  
+Use * to exclude all mutators.  
+Specify mutator names (e.g., branch/case) to exclude selectively.
+
+Example:
+```bash
+s := MyStruct{name: "Go"}
+s.Method()
+
+// mutator-disable-regexp s\.Method\(\) *  
+```
+
+All mutation annotations only apply to the file where they are declared. There is no global/cross-file propagation.
+
 ## <a name="write-mutation-exec-commands"></a>How do I write my own mutation exec commands?
 
 A mutation exec command is invoked for every mutation which is necessary to test a mutation. Commands should handle at least the following phases.
