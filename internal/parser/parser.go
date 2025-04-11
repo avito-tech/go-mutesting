@@ -49,6 +49,7 @@ func ParseDiffOutput(diff string) []int64 {
 	return lines
 }
 
+// FindOriginalStartLine attempts to find the original line number where a mutation occurred.
 func FindOriginalStartLine(diff []byte) int64 {
 	changedLines := ParseDiffOutput(string(diff))
 
