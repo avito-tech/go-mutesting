@@ -48,3 +48,13 @@ func ParseDiffOutput(diff string) []int64 {
 
 	return lines
 }
+
+func FindOriginalStartLine(diff []byte) int64 {
+	changedLines := ParseDiffOutput(string(diff))
+
+	if len(changedLines) == 0 || len(changedLines) > 1 {
+		return fallbackLine
+	}
+
+	return changedLines[0]
+}

@@ -436,12 +436,8 @@ func mutateExec(
 
 		diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
 
-		changedLines := parser.ParseDiffOutput(string(diff))
-
-		if len(changedLines) == 0 || len(changedLines) > 1 {
-			mutant.Mutator.OriginalStartLine = 0
-		}
-		mutant.Mutator.OriginalStartLine = changedLines[0]
+		startLine := parser.FindOriginalStartLine(diff)
+		mutant.Mutator.OriginalStartLine = startLine
 
 		if err == nil {
 			execExitCode = 0

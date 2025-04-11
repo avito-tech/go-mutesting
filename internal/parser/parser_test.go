@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -9,7 +8,7 @@ func TestParseDiffOutput(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected []int64
+		expected int64
 	}{
 		{
 			name: "single line change 1",
@@ -24,7 +23,7 @@ func TestParseDiffOutput(t *testing.T) {
 							slog.Info(strconv.Itoa(ddd))
 							fmt.Println("doo")
 					 }`,
-			expected: []int64{23},
+			expected: 23,
 		},
 		{
 			name: "single line change 2",
@@ -38,27 +37,50 @@ func TestParseDiffOutput(t *testing.T) {
 					 
 							fmt.Println("foo")
 					 }`,
-			expected: []int64{17},
+			expected: 17,
+		},
+		{
+			name: "multiple changes should return fallback",
+			input: `--- Original
+					+++ New
+					@@ -14,7 +14,7 @@
+					 func foo() {
+							jjj := 6
+					-       slog.Info(strconv.Itoa(jjj))
+					+       _, _, _ = slog.Info, strconv.Itoa, jjj
+					 
+							fmt.Println("foo")
+					 }
+					@@ -20,7 +20,7 @@
+					}
+ 
+					func doo() {
+					-       ddd := 6
+					+       ddd := 5
+							slog.Info(strconv.Itoa(ddd))
+							fmt.Println("doo")
+					 }`,
+			expected: 0,
 		},
 		{
 			name:     "empty input",
 			input:    "",
-			expected: []int64{},
+			expected: 0,
 		},
 		{
 			name: "invalid line numbers",
 			input: `@@ -abc +def @@
 					-garbage
 					+garbage`,
-			expected: []int64{},
+			expected: 0,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ParseDiffOutput(tt.input)
-			if !assert.Equal(t, got, tt.expected) {
-				t.Errorf("parseDiffOutput() = %v, want %v", got, tt.expected)
+			got := FindOriginalStartLine([]byte(tt.input))
+			if got != tt.expected {
+				t.Errorf("FindOriginalStartLine() = %v, want %v", got, tt.expected)
 			}
 		})
 	}
