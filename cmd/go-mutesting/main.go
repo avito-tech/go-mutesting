@@ -5,9 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/annotation"
-	"github.com/avito-tech/go-mutesting/internal/filter"
-	"github.com/avito-tech/go-mutesting/internal/parser"
 	"go/ast"
 	"go/format"
 	"go/printer"
@@ -24,7 +21,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/avito-tech/go-mutesting/internal/annotation"
 	"github.com/avito-tech/go-mutesting/internal/console"
+	"github.com/avito-tech/go-mutesting/internal/filter"
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/avito-tech/go-mutesting/internal/parser"
