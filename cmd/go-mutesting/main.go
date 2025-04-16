@@ -24,6 +24,7 @@ import (
 	"github.com/avito-tech/go-mutesting/internal/console"
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
+	"github.com/avito-tech/go-mutesting/internal/parser"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -434,6 +435,10 @@ func mutateExec(
 		debug(opts, "Execute built-in exec command for mutation")
 
 		diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
+
+		startLine := parser.FindOriginalStartLine(diff)
+		mutant.Mutator.OriginalStartLine = startLine
+
 		if err == nil {
 			execExitCode = 0
 		} else if e, ok := err.(*exec.ExitError); ok {
