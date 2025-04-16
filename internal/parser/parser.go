@@ -38,12 +38,7 @@ func ParseDiffOutput(diff string) []int64 {
 		}
 
 		actualLine := line + diffContextLines
-		if actualLine > 0 {
-			lines = append(lines, actualLine)
-		} else {
-			lines = append(lines, fallbackLine)
-		}
-
+		lines = append(lines, actualLine)
 	}
 
 	return lines
