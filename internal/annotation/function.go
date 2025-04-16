@@ -28,11 +28,8 @@ func (f *FunctionAnnotation) collectFunctions(fun *ast.FuncDecl) {
 
 // filterFunctions checks whether a given node should be excluded from mutation
 func (f *FunctionAnnotation) filterFunctions(node ast.Node) bool {
-	if _, exists := f.Exclusions[node.Pos()]; exists {
-		return true
-	}
-
-	return false
+	_, exists := f.Exclusions[node.Pos()]
+	return exists
 }
 
 // existsFuncAnnotation checks if a function declaration has the annotation

@@ -32,7 +32,7 @@ func (r *RegexAnnotation) parseRegexAnnotation(comment string) (*regexp.Regexp, 
 		return nil, mutatorInfo{}
 	}
 
-	mutators := make([]string, 0)
+	var mutators []string
 	if len(parts) > 1 {
 		mutators = parseMutators(parts[1])
 	}

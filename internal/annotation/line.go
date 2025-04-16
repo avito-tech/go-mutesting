@@ -50,9 +50,9 @@ func (l *LineAnnotation) collectNodesOnNextLine(comment *ast.Comment, fset *toke
 // 1. Whether the node appears in the Exclusions map
 // 2. Whether the current mutator is in the node's exclusion list
 func (l *LineAnnotation) filterNodesOnNextLine(node ast.Node, mutatorName string) bool {
-	for _, nnn := range l.Exclusions {
-		if mutatorInfo, exists := nnn[node.Pos()]; exists {
-			if shouldSkipMutator(mutatorInfo, mutatorName) {
+	for _, n := range l.Exclusions {
+		if mutators, exists := n[node.Pos()]; exists {
+			if shouldSkipMutator(mutators, mutatorName) {
 				return true
 			}
 		}
