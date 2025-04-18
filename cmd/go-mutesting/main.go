@@ -21,7 +21,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/avito-tech/go-mutesting/internal/annotation"
 	"github.com/avito-tech/go-mutesting/internal/console"
+	"github.com/avito-tech/go-mutesting/internal/filter"
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/avito-tech/go-mutesting/internal/parser"
@@ -96,18 +98,6 @@ func checkArguments(args []string, opts *models.Options) (bool, int) {
 	return false, 0
 }
 
-func debug(opts *models.Options, format string, args ...interface{}) {
-	if opts.General.Debug {
-		fmt.Printf(format+"\n", args...)
-	}
-}
-
-func verbose(opts *models.Options, format string, args ...interface{}) {
-	if opts.General.Verbose || opts.General.Debug {
-		fmt.Printf(format+"\n", args...)
-	}
-}
-
 func exitError(format string, args ...interface{}) int {
 	_, _ = fmt.Fprintf(os.Stderr, format+"\n", args...)
 
@@ -142,7 +132,7 @@ func mainCmd(args []string) int {
 		for _, file := range files {
 			fmt.Println(file)
 
-			src, _, err := mutesting.ParseFile(file)
+			src, _, err := parser.ParseFile(file)
 			if err != nil {
 				return exitError("Could not open file %q: %v", file, err)
 			}
@@ -190,7 +180,7 @@ MUTATOR:
 			}
 		}
 
-		verbose(opts, "Enable mutator %q", name)
+		console.Verbose(opts, "Enable mutator %q", name)
 
 		m, _ := mutator.New(name)
 		mutators = append(mutators, mutatorItem{
@@ -203,7 +193,7 @@ MUTATOR:
 	if err != nil {
 		panic(err)
 	}
-	verbose(opts, "Save mutations into %q", tmpDir)
+	console.Verbose(opts, "Save mutations into %q", tmpDir)
 
 	var execs []string
 	if opts.Exec.Exec != "" {
@@ -213,9 +203,22 @@ MUTATOR:
 	report := &models.Report{}
 
 	for _, file := range files {
-		verbose(opts, "Mutate %q", file)
+		console.Verbose(opts, "Mutate %q", file)
 
-		src, fset, pkg, info, err := mutesting.ParseAndTypeCheckFile(file)
+		annotationProcessor := annotation.NewProcessor()
+		skipFilterProcessor := filter.NewSkipMakeArgsFilter()
+
+		collectors := []filter.NodeCollector{
+			annotationProcessor,
+			skipFilterProcessor,
+		}
+
+		filters := []filter.NodeFilter{
+			annotationProcessor,
+			skipFilterProcessor,
+		}
+
+		src, fset, pkg, info, err := parser.ParseAndTypeCheckFile(file, collectors)
 		if err != nil {
 			return exitError(err.Error())
 		}
@@ -232,7 +235,7 @@ MUTATOR:
 		if err != nil {
 			panic(err)
 		}
-		debug(opts, "Save original into %q", originalFile)
+		console.Debug(opts, "Save original into %q", originalFile)
 
 		mutationID := 0
 
@@ -244,11 +247,11 @@ MUTATOR:
 
 			for _, f := range astutil.Functions(src) {
 				if m.MatchString(f.Name.Name) {
-					mutationID = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, f, tmpFile, execs, report)
+					mutationID = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, f, tmpFile, execs, report, filters)
 				}
 			}
 		} else {
-			_ = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, src, tmpFile, execs, report)
+			_ = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, src, tmpFile, execs, report, filters)
 		}
 	}
 
@@ -257,7 +260,7 @@ MUTATOR:
 		if err != nil {
 			panic(err)
 		}
-		debug(opts, "Remove %q", tmpDir)
+		console.Debug(opts, "Remove %q", tmpDir)
 	}
 
 	report.Calculate()
@@ -303,7 +306,7 @@ MUTATOR:
 		return exitError(err.Error())
 	}
 
-	verbose(opts, "Save report into %q", models.ReportFileName)
+	console.Verbose(opts, "Save report into %q", models.ReportFileName)
 
 	return returnOk
 }
@@ -322,11 +325,14 @@ func mutate(
 	mutatedFile string,
 	execs []string,
 	stats *models.Report,
+	filters []filter.NodeFilter,
 ) int {
 	for _, m := range mutators {
-		debug(opts, "Mutator %s", m.Name)
+		console.Debug(opts, "Mutator %s", m.Name)
 
-		changed := mutesting.MutateWalk(pkg, info, node, m.Mutator)
+		mutatorAnnotated := annotation.DecoratorFilter(m.Mutator, m.Name, filters...)
+
+		changed := mutesting.MutateWalk(pkg, info, node, mutatorAnnotated)
 
 		for {
 			_, ok := <-changed
@@ -350,16 +356,16 @@ func mutate(
 			if err != nil {
 				fmt.Printf("INTERNAL ERROR %s\n", err.Error())
 			} else if duplicate {
-				debug(opts, "%q is a duplicate, we ignore it", mutationFile)
+				console.Debug(opts, "%q is a duplicate, we ignore it", mutationFile)
 
 				stats.Stats.DuplicatedCount++
 			} else {
-				debug(opts, "Save mutation into %q with checksum %s", mutationFile, checksum)
+				console.Debug(opts, "Save mutation into %q with checksum %s", mutationFile, checksum)
 
 				if !opts.Exec.NoExec {
 					execExitCode := mutateExec(opts, pkg, originalFile, src, mutationFile, execs, &mutant)
 
-					debug(opts, "Exited with %d", execExitCode)
+					console.Debug(opts, "Exited with %d", execExitCode)
 
 					mutatedSourceCode, err := os.ReadFile(mutationFile)
 					if err != nil {
@@ -432,7 +438,7 @@ func mutateExec(
 	mutant *models.Mutant,
 ) (execExitCode int) {
 	if len(execs) == 0 {
-		debug(opts, "Execute built-in exec command for mutation")
+		console.Debug(opts, "Execute built-in exec command for mutation")
 
 		diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
 
@@ -519,7 +525,7 @@ func mutateExec(
 		return execExitCode
 	}
 
-	debug(opts, "Execute %q for mutation", opts.Exec.Exec)
+	console.Debug(opts, "Execute %q for mutation", opts.Exec.Exec)
 
 	execCommand := exec.Command(execs[0], execs[1:]...)
 
