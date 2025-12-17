@@ -10,7 +10,7 @@ type options struct {
 
 type OptionFunc func(*options)
 
-func WithGlobalRegexpFilter(filteredRegexps []string) OptionFunc {
+func WithGlobalRegexpFilter(filteredRegexps ...string) OptionFunc {
 	return func(o *options) {
 		o.global.filteredRegexps = filteredRegexps
 	}
