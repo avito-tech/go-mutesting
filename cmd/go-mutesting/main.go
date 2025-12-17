@@ -205,7 +205,7 @@ MUTATOR:
 	for _, file := range files {
 		console.Verbose(opts, "Mutate %q", file)
 
-		annotationProcessor := annotation.NewProcessor()
+		annotationProcessor := annotation.NewProcessor(annotation.WithGlobalRegexpFilter(opts.Config.ExcludeRegexp...))
 		skipFilterProcessor := filter.NewSkipMakeArgsFilter()
 
 		collectors := []filter.NodeCollector{
@@ -223,7 +223,7 @@ MUTATOR:
 			return exitError(err.Error())
 		}
 
-		err = os.MkdirAll(tmpDir+"/"-filepath.Dir(file), 0755)
+		err = os.MkdirAll(tmpDir+"/"+filepath.Dir(file), 0755)
 		if err != nil {
 			panic(err)
 		}

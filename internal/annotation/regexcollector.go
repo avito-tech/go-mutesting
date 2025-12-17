@@ -67,7 +67,8 @@ func (r *RegexCollector) Collect(
 }
 
 func parseConfig(configLine string) (*regexp.Regexp, mutatorInfo) {
-	splitted := strings.SplitN(configLine, " ", 2) // splitted[0] - contains regexp splitted[1] contains mutators
+	// splitted[0] - contains regexp splitted[1] contains mutators
+	splitted := strings.SplitN(configLine, " ", 2)
 
 	if len(splitted) < 1 {
 		return nil, mutatorInfo{}
@@ -83,6 +84,8 @@ func parseConfig(configLine string) (*regexp.Regexp, mutatorInfo) {
 	var mutators []string
 	if len(splitted) > 1 {
 		mutators = parseMutators(splitted[1])
+	} else {
+		mutators = []string{"*"}
 	}
 
 	return re, mutatorInfo{
