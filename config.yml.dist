@@ -4,3 +4,5 @@ json_output: false
 silent_mode: false
 exclude_dirs:
  - example
+exclude_regexp:
+ - skipFoo *

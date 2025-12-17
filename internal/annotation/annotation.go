@@ -19,26 +19,38 @@ const (
 
 // Processor handles mutation exclusion logic based on source code annotations.
 type Processor struct {
+	options
+
 	FunctionAnnotation FunctionAnnotation
 	RegexAnnotation    RegexAnnotation
 	LineAnnotation     LineAnnotation
 }
 
 // NewProcessor creates and returns a new initialized Processor.
-func NewProcessor() *Processor {
-	return &Processor{
+func NewProcessor(optionFunc ...OptionFunc) *Processor {
+	opts := options{}
+
+	for _, f := range optionFunc {
+		f(&opts)
+	}
+
+	processor := &Processor{
+		options: opts,
 		FunctionAnnotation: FunctionAnnotation{
 			Exclusions: make(map[token.Pos]struct{}), // *ast.FuncDecl node + all its children
 			Name:       FuncAnnotation},
 		RegexAnnotation: RegexAnnotation{
-			Exclusions: make(map[int]map[token.Pos]mutatorInfo), // source code line -> node -> excluded mutators
-			Name:       RegexpAnnotation,
+			GlobalRegexCollector: NewRegexCollector(opts.global.filteredRegexps),
+			Exclusions:           make(map[int]map[token.Pos]mutatorInfo), // source code line -> node -> excluded mutators
+			Name:                 RegexpAnnotation,
 		},
 		LineAnnotation: LineAnnotation{
 			Exclusions: make(map[int]map[token.Pos]mutatorInfo), // source code line -> node -> excluded mutators
 			Name:       NextLineAnnotation,
 		},
 	}
+
+	return processor
 }
 
 type mutatorInfo struct {
@@ -46,7 +58,12 @@ type mutatorInfo struct {
 }
 
 // Collect processes an AST file to gather all mutation exclusions based on annotations.
-func (p *Processor) Collect(file *ast.File, fset *token.FileSet, fileAbs string) {
+func (p *Processor) Collect(
+	file *ast.File,
+	fset *token.FileSet,
+	fileAbs string,
+) {
+	// comment based collectors
 	for _, decl := range file.Decls {
 		if f, ok := decl.(*ast.FuncDecl); ok {
 			if p.existsFuncAnnotation(f) {
@@ -63,6 +80,8 @@ func (p *Processor) Collect(file *ast.File, fset *token.FileSet, fileAbs string)
 			handler.Handle(name, comm, fset, file, fileAbs)
 		}
 	}
+
+	p.RegexAnnotation.GlobalRegexCollector.Collect(fset, file, fileAbs)
 
 	p.collectNodesForBlockStmt()
 }

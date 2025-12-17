@@ -47,5 +47,6 @@ type Options struct {
 		HTMLOutput           bool     `yaml:"html_output"`
 		SilentMode           bool     `yaml:"silent_mode"`
 		ExcludeDirs          []string `yaml:"exclude_dirs"`
+		ExcludeRegexp        []string `yaml:"exclude_regexp"`
 	}
 }
