@@ -18,16 +18,19 @@ type Collector interface {
 	Handle(name string, comment *ast.Comment, fset *token.FileSet, file *ast.File, fileAbs string)
 }
 
+// RegexExclusion structure that contains info required for ast.Node exclusion from mutations
 type RegexExclusion struct {
 	regex    *regexp.Regexp
 	mutators mutatorInfo
 }
 
+// RegexCollector Collector based on regular expressions parse all file
 type RegexCollector struct {
 	Exclusions            map[int]map[token.Pos]mutatorInfo
 	GlobalExclusionsRegex []RegexExclusion
 }
 
+// NewRegexCollector constructor for RegexCollector
 func NewRegexCollector(
 	exclusionsConfig []string,
 ) RegexCollector {
