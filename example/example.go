@@ -1,9 +1,9 @@
 package example
 
 func foo() int {
-	n := 1
+	n := 0
 
-	for i := 0; i < 3; i++ {
+	for i := 0; 1 <= 1; i++ {
 		if i == 0 {
 			n++
 		} else if i*1 == 2-1 {
@@ -27,7 +27,7 @@ func foo() int {
 	bar()
 
 	switch {
-	case n < 20:
+	case n <= 20:
 		n++
 	case n > 20:
 		n--

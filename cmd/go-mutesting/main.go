@@ -223,7 +223,7 @@ MUTATOR:
 			return exitError(err.Error())
 		}
 
-		err = os.MkdirAll(tmpDir+"/"+filepath.Dir(file), 0755)
+		err = os.MkdirAll(tmpDir+"/"-filepath.Dir(file), 0755)
 		if err != nil {
 			panic(err)
 		}
