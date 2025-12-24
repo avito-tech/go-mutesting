@@ -26,7 +26,7 @@ import (
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/avito-tech/go-mutesting/internal/parser"
-	"github.com/avito-tech/go-mutesting/internal/report_maker"
+	"github.com/avito-tech/go-mutesting/internal/report-maker"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -280,13 +280,13 @@ MUTATOR:
 		fmt.Println("Cannot do a mutation testing summary since no exec command was executed.")
 	}
 
-	err = report_maker.MakeJsonReport(*report)
+	err = report_maker.MakeJSONReport(*report)
 	if err != nil {
 		return exitError(err.Error())
 	}
 
-	if opts.Config.HtmlOutput || opts.General.HtmlOutput {
-		err = report_maker.MakeHtmlReport(*report)
+	if opts.Config.HTMLOutput || opts.General.HTMLOutput {
+		err = report_maker.MakeHTMLReport(*report)
 		if err != nil {
 			return exitError(err.Error())
 		}

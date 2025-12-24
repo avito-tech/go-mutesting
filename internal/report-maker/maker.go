@@ -23,8 +23,8 @@ var funcMap = template.FuncMap{
 	"hasPrefix": strings.HasPrefix,
 }
 
-// MakeHtmlReport is a function for creating an HTML report based on a stripped-down version of the models.Report model (not all fields are used)
-func MakeHtmlReport(report models.Report) error {
+// MakeHTMLReport is a function for creating an HTML report based on a stripped-down version of the models.Report model (not all fields are used)
+func MakeHTMLReport(report models.Report) error {
 	report.Stats.Msi = math.Round(report.Stats.Msi*10_000) / 100
 
 	groupedMutants := make(map[string][]models.Mutant)
@@ -33,16 +33,16 @@ func MakeHtmlReport(report models.Report) error {
 		groupedMutants[filePath] = append(groupedMutants[filePath], mutant)
 	}
 
-	t, err := template.New(models.ReportHtmlFileName).Funcs(funcMap).Parse(reportTmpl)
+	t, err := template.New(models.ReportHTMLFileName).Funcs(funcMap).Parse(reportTmpl)
 	if err != nil {
 		return fmt.Errorf("Error while parse template: %w ", err)
 	}
 
-	file, err := createOrTruncateReportFile(models.ReportHtmlFileName)
+	file, err := createOrTruncateReportFile(models.ReportHTMLFileName)
 	if err != nil {
 		return fmt.Errorf("Error while open/create .html report file from template: %w ", err)
 	}
-	defer closeReportFile(file, models.ReportHtmlFileName)
+	defer closeReportFile(file, models.ReportHTMLFileName)
 
 	data := struct {
 		Stats          models.Stats
@@ -60,8 +60,8 @@ func MakeHtmlReport(report models.Report) error {
 	return nil
 }
 
-// MakeJsonReport is a function for creating json report, which is based on models.Report
-func MakeJsonReport(report models.Report) error {
+// MakeJSONReport is a function for creating json report, which is based on models.Report
+func MakeJSONReport(report models.Report) error {
 	jsonContent, err := json.Marshal(report)
 	if err != nil {
 		return err
