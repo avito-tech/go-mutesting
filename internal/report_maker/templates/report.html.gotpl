@@ -4,175 +4,508 @@
     <meta charset="UTF-8">
     <title>Mutation Testing Report</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f5;
+        :root {
+            --theme-palette-green800: #02d15c;
+            --theme-palette-blue800: #0099f7;
+            --theme-palette-red600: #ff4053;
+            --theme-palette-violet600: #965eeb;
+            --theme-palette-gray50: #f9fafb;
+            --theme-palette-gray100: #f3f4f6;
+            --theme-palette-gray200: #e5e7eb;
+            --theme-palette-gray600: #4b5563;
+            --theme-palette-gray800: #1f2937;
+            --theme-palette-yellow500: #f59e0b;
+
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--theme-palette-gray100), var(--theme-palette-gray50));
+            background-attachment: fixed;
+            color: var(--theme-palette-gray800);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        .stats {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--theme-palette-violet600);
         }
-        .stats h2 {
-            margin-top: 0;
-            color: #333;
-        }
-        .stats p {
-            margin: 5px 0;
-            color: #555;
-        }
-        .file {
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .file-header {
-            font-size: 18px;
-            font-weight: bold;
+
+        .header h1 {
+            font-size: 2.2rem;
             margin-bottom: 10px;
-            color: #333;
+            color: var(--theme-palette-violet600);
         }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: var(--transition);
+            border-top: 3px solid;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.total {
+            border-top-color: var(--theme-palette-blue800);
+        }
+
+        .stat-card.killed {
+            border-top-color: var(--theme-palette-green800);
+        }
+
+        .stat-card.escaped {
+            border-top-color: var(--theme-palette-red600);
+        }
+
+        .stat-card.msi {
+            border-top-color: var(--theme-palette-violet600);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--theme-palette-gray600);
+            font-weight: 500;
+        }
+
+        .warning-box {
+            background: linear-gradient(90deg, #fff9e6, #fff5d6);
+            border: 1px solid #fde68a;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--theme-palette-yellow500);
+        }
+
+        .warning-box-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #92400e;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .warning-icon {
+            font-size: 1.3rem;
+        }
+
+        .warning-box-content {
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        .file {
+            background: white;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .file-header {
+            background: linear-gradient(90deg, var(--theme-palette-gray100), var(--theme-palette-gray50));
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--theme-palette-gray800);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--theme-palette-gray200);
+        }
+
+        .file-header:hover {
+            background: var(--theme-palette-gray200);
+        }
+
+        .file-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-header::after {
+            content: "▼";
+            font-size: 0.8rem;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            color: var(--theme-palette-violet600);
+        }
+
+        .file.expanded .file-header::after {
+            transform: rotate(180deg);
+        }
+
+        .file-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+                        padding 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .file.expanded .file-content {
+            max-height: 10000px;
+            padding: 15px 20px;
+        }
+
         .mutator {
             margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 5px;
-            background-color: #fafafa;
+            border: 1px solid var(--theme-palette-gray200);
+            border-radius: 6px;
+            overflow: hidden;
         }
-        .mutator-header {
-            font-size: 16px;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 10px;
-        }
-        .diff {
-            display: none;
-            background-color: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            transition: opacity 0.3s ease;
-        }
-        .diff h3 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #555;
-        }
-        .diff-line {
-            font-family: monospace;
-            white-space: pre-wrap;
-            padding: 2px 5px;
-            margin: 2px 0;
-            border-radius: 3px;
-        }
-        .diff-line.removed {
-            background-color: #ffe6e6;
-            color: #d9534f;
-        }
-        .diff-line.added {
-            background-color: #e6ffe6;
-            color: #5cb85c;
-        }
-        .original, .mutated {
-            display: none;
-            margin-top: 10px;
-            background-color: #fff;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            transition: opacity 0.3s ease;
-        }
-        .original h3, .mutated h3 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #555;
-        }
-        pre {
-            margin: 0;
-            font-family: monospace;
-            font-size: 14px;
-            color: #333;
-            white-space: pre-wrap;
-        }
-        .toggle {
-            cursor: pointer;
-            color: #fff;
-            background-color: #6c757d;
-            padding: 5px 10px;
-            border-radius: 3px;
-            display: inline-block;
-            margin-top: 10px;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-        .toggle.active {
-            background-color: #007bff;
-        }
-        .toggle:hover {
-            opacity: 0.9;
-        }
-        .toggle:active {
-            transform: scale(0.98);
-        }
-    </style>
-    <script>
-        function toggleVisibility(id, button) {
-            var element = document.getElementById(id);
-            var currentDisplay = window.getComputedStyle(element).display;
 
-            if (currentDisplay === "none") {
-                element.style.display = "block";
-                setTimeout(() => {
-                    element.style.opacity = 1;
-                }, 10);
-                button.classList.add('active');
-            } else {
-                element.style.opacity = 0;
-                setTimeout(() => {
-                    element.style.display = "none";
-                }, 300);
-                button.classList.remove('active');
+        .mutator-header {
+            padding: 12px 15px;
+            background: white;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--theme-palette-gray800);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .mutator-header:hover {
+            background: var(--theme-palette-gray100);
+        }
+
+        .mutator-header::after {
+            content: "▶";
+            font-size: 0.7rem;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            color: var(--theme-palette-blue800);
+        }
+
+        .mutator.expanded .mutator-header::after {
+            transform: rotate(90deg);
+        }
+
+        .mutator-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+                        padding 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            background: var(--theme-palette-gray50);
+        }
+
+        .mutator.expanded .mutator-content {
+            max-height: 2000px;
+            padding: 15px;
+        }
+
+        .diff {
+            margin-top: 10px;
+        }
+
+        .diff h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.95rem;
+            color: var(--theme-palette-gray800);
+            font-weight: 600;
+        }
+
+        .diff-content {
+            background: white;
+            border-radius: 4px;
+            border: 1px solid var(--theme-palette-gray200);
+            overflow: hidden;
+        }
+
+        .diff-line {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            padding: 3px 10px;
+            margin: 0;
+            white-space: pre;
+        }
+
+        .diff-line.removed {
+            background-color: rgba(255, 64, 83, 0.1);
+            color: var(--theme-palette-red600);
+        }
+
+        .diff-line.added {
+            background-color: rgba(2, 209, 92, 0.1);
+            color: var(--theme-palette-green800);
+        }
+
+        .diff-line.unchanged {
+            background-color: white;
+            color: var(--theme-palette-gray800);
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            background: var(--theme-palette-violet600);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 5px;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover {
+            background: #8a51e0;
+            transform: translateY(-2px);
+        }
+
+        .mutator-count {
+            background: var(--theme-palette-gray200);
+            color: var(--theme-palette-gray600);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mutant-icon {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .file-header {
+                font-size: 1rem;
+                padding: 12px 15px;
+            }
+
+            .mutator-header {
+                font-size: 0.95rem;
+                padding: 10px 12px;
             }
         }
-    </script>
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .control-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                margin: 2px;
+            }
+
+            .file-header-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="stats">
-            <h2>Mutation Testing Report</h2>
-            <p>Total Mutants: {{.Stats.TotalMutantsCount}}</p>
-            <p>Killed: {{.Stats.KilledCount}}</p>
-            <p>Escaped: {{.Stats.EscapedCount}}</p>
-            <p>MSI: {{.Stats.Msi}}%</p>
+        <!-- Header section with report title -->
+        <div class="header">
+            <h1>🔬 Mutation Testing Report</h1>
+            <p>Detailed analysis of code mutation results</p>
         </div>
 
+        <!-- Statistics cards showing key metrics -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-value">{{.Stats.TotalMutantsCount}}</div>
+                <div class="stat-label">Total Mutants</div>
+            </div>
+            <div class="stat-card killed">
+                <div class="stat-value">{{.Stats.KilledCount}}</div>
+                <div class="stat-label">Killed</div>
+            </div>
+            <div class="stat-card escaped">
+                <div class="stat-value">{{.Stats.EscapedCount}}</div>
+                <div class="stat-label">Escaped</div>
+            </div>
+            <div class="stat-card msi">
+                <div class="stat-value">{{.Stats.Msi}}%</div>
+                <div class="stat-label">MSI</div>
+            </div>
+        </div>
+
+        <!-- Warning box explaining report scope -->
+        <div class="warning-box">
+            <div class="warning-box-header">
+                <span class="warning-icon">⚠️</span>
+                <span>Important Notice</span>
+            </div>
+            <div class="warning-box-content">
+                This report displays only <strong>escaped mutants</strong> that require attention and fixing.
+                These are the mutations that survived your test suite and indicate potential gaps in test coverage.
+                Killed mutants (successfully detected by tests) are not shown in detail to keep the report focused
+                on areas that need improvement.
+            </div>
+        </div>
+
+        <!-- Control buttons for expanding/collapsing all sections -->
+        <div class="controls">
+            <button class="control-btn" onclick="expandAll()">📂 Expand All Files</button>
+            <button class="control-btn" onclick="collapseAll()">📁 Collapse All Files</button>
+        </div>
+
+        <!-- File sections with collapsible mutants -->
         {{range $filePath, $mutants := .GroupedMutants}}
         <div class="file">
-            <div class="file-header">{{$filePath}}</div>
-            {{range $index, $mutant := $mutants}}
-            <div class="mutator">
-                <div class="mutator-header">Mutator: {{$mutant.Mutator.MutatorName}}</div>
-                <div class="toggle" onclick="toggleVisibility('diff-{{$filePath}}-{{$index}}', this)">Show/Hide Diff</div>
-                <div id="diff-{{$filePath}}-{{$index}}" class="diff">
-                    <h3>Diff:</h3>
-                    {{range $line := splitDiff $mutant.Diff}}
-                        <div class="diff-line {{if hasPrefix $line "-"}}removed{{else if hasPrefix $line "+"}}added{{end}}">{{$line}}</div>
-                    {{end}}
+            <div class="file-header" onclick="toggleFile(this)">
+                <div class="file-header-info">
+                    <span>📄 {{$filePath}}</span>
+                    <span class="mutator-count">🧬 {{len $mutants}} mutants</span>
                 </div>
             </div>
-            {{end}}
+            <div class="file-content">
+                {{range $index, $mutant := $mutants}}
+                <div class="mutator">
+                    <div class="mutator-header" onclick="toggleMutator(this)">
+                        <span>⚡ Mutator: {{$mutant.Mutator.MutatorName}}</span>
+                    </div>
+                    <div class="mutator-content">
+                        <div class="diff">
+                            <h3>🔄 Diff:</h3>
+                            <div class="diff-content">
+                                {{range $line := splitDiff $mutant.Diff}}
+                                    <div class="diff-line {{if hasPrefix $line "-"}}removed{{else if hasPrefix $line "+"}}added{{else}}unchanged{{end}}">{{$line}}</div>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
         </div>
         {{end}}
     </div>
+
+    <script>
+        // Toggle file accordion expansion
+        function toggleFile(element) {
+            const file = element.parentElement;
+            file.classList.toggle('expanded');
+        }
+
+        // Toggle mutator accordion expansion
+        function toggleMutator(element) {
+            const mutator = element.parentElement;
+            mutator.classList.toggle('expanded');
+        }
+
+        // Expand all files and their mutators
+        function expandAll() {
+            const files = document.querySelectorAll('.file');
+            files.forEach(file => {
+                file.classList.add('expanded');
+                // Automatically expand all mutators inside
+                const mutators = file.querySelectorAll('.mutator');
+                mutators.forEach(mutator => {
+                    mutator.classList.add('expanded');
+                });
+            });
+        }
+
+        // Collapse all files and their mutators
+        function collapseAll() {
+            const files = document.querySelectorAll('.file');
+            files.forEach(file => {
+                file.classList.remove('expanded');
+                // Collapse all mutators inside
+                const mutators = file.querySelectorAll('.mutator');
+                mutators.forEach(mutator => {
+                    mutator.classList.remove('expanded');
+                });
+            });
+        }
+
+        // Initialize page - all files collapsed by default
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ready for additional initialization if needed
+        });
+    </script>
 </body>
 </html>
