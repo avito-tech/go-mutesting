@@ -2,6 +2,7 @@ package models
 
 // ReportFileName File name for json report
 var ReportFileName string = "report.json"
+var ReportHtmlFileName string = "go-mutesting-report.html"
 
 // Report Structure for mutation report
 type Report struct {

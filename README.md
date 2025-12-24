@@ -429,12 +429,13 @@ If `--config` is presented, the library will use the given config. Otherwise, no
 The config contains the following parameters:  
 
 
-| Name                 | Default value |Description                                    |
-| :------------------- | :------------ |:--------------------------------------------- |
-| skip_without_test    | true          | Skip files without _test.go tests. |
-| skip_with_build_tags | true          | If in _test.go file we have --build tag - then skip it. |
-| json_output          | false         | Make report.json file with a mutation test report. |
-| silent_mode          | false         | Do not print mutation stats. |
+| Name                 | Default value | Description                                                                                                                                                        |
+|:---------------------| :------------ |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| skip_without_test    | true          | Skip files without _test.go tests.                                                                                                                                 |
+| skip_with_build_tags | true          | If in _test.go file we have --build tag - then skip it.                                                                                                            |
+| json_output          | false         | Make report.json file with a mutation test report.                                                                                                                 |
+| html_output          | false         | Make go-mutesting-report.html file with a mutation test report.                                                                                                    |
+| silent_mode          | false         | Do not print mutation stats.                                                                                                                                       |
 | exclude_dirs         | []string(nil) | Directories for excluding. In fact, there are not directories. These are the prefix for a path when we scan a file system. So this parameter is sensitive for args |
 
 ## <a name="write-mutators"></a>How do I write my own mutators?

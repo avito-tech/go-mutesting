@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mutation Testing Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stats {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .stats h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .stats p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .file {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .file-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .mutator {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .mutator-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .diff {
+            display: none;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: opacity 0.3s ease;
+        }
+        .diff h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #555;
+        }
+        .diff-line {
+            font-family: monospace;
+            white-space: pre-wrap;
+            padding: 2px 5px;
+            margin: 2px 0;
+            border-radius: 3px;
+        }
+        .diff-line.removed {
+            background-color: #ffe6e6;
+            color: #d9534f;
+        }
+        .diff-line.added {
+            background-color: #e6ffe6;
+            color: #5cb85c;
+        }
+        .original, .mutated {
+            display: none;
+            margin-top: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: opacity 0.3s ease;
+        }
+        .original h3, .mutated h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #555;
+        }
+        pre {
+            margin: 0;
+            font-family: monospace;
+            font-size: 14px;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        .toggle {
+            cursor: pointer;
+            color: #fff;
+            background-color: #6c757d;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .toggle.active {
+            background-color: #007bff;
+        }
+        .toggle:hover {
+            opacity: 0.9;
+        }
+        .toggle:active {
+            transform: scale(0.98);
+        }
+    </style>
+    <script>
+        function toggleVisibility(id, button) {
+            var element = document.getElementById(id);
+            var currentDisplay = window.getComputedStyle(element).display;
+
+            if (currentDisplay === "none") {
+                element.style.display = "block";
+                setTimeout(() => {
+                    element.style.opacity = 1;
+                }, 10);
+                button.classList.add('active');
+            } else {
+                element.style.opacity = 0;
+                setTimeout(() => {
+                    element.style.display = "none";
+                }, 300);
+                button.classList.remove('active');
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="stats">
+            <h2>Mutation Testing Report</h2>
+            <p>Total Mutants: {{.Stats.TotalMutantsCount}}</p>
+            <p>Killed: {{.Stats.KilledCount}}</p>
+            <p>Escaped: {{.Stats.EscapedCount}}</p>
+            <p>MSI: {{.Stats.Msi}}%</p>
+        </div>
+
+        {{range $filePath, $mutants := .GroupedMutants}}
+        <div class="file">
+            <div class="file-header">{{$filePath}}</div>
+            {{range $index, $mutant := $mutants}}
+            <div class="mutator">
+                <div class="mutator-header">Mutator: {{$mutant.Mutator.MutatorName}}</div>
+                <div class="toggle" onclick="toggleVisibility('diff-{{$filePath}}-{{$index}}', this)">Show/Hide Diff</div>
+                <div id="diff-{{$filePath}}-{{$index}}" class="diff">
+                    <h3>Diff:</h3>
+                    {{range $line := splitDiff $mutant.Diff}}
+                        <div class="diff-line {{if hasPrefix $line "-"}}removed{{else if hasPrefix $line "+"}}added{{end}}">{{$line}}</div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>
