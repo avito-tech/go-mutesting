@@ -1,7 +1,7 @@
-package report_maker
+package reportMaker
 
 import (
-	_ "embed"
+	_ "embed" // for embedding report template
 	"encoding/json"
 	"errors"
 	"fmt"

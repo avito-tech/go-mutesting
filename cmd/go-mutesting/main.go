@@ -26,7 +26,7 @@ import (
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/avito-tech/go-mutesting/internal/parser"
-	"github.com/avito-tech/go-mutesting/internal/report-maker"
+	"github.com/avito-tech/go-mutesting/internal/reportMaker"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -280,19 +280,21 @@ MUTATOR:
 		fmt.Println("Cannot do a mutation testing summary since no exec command was executed.")
 	}
 
-	err = report_maker.MakeJSONReport(*report)
+	err = reportMaker.MakeJSONReport(*report)
 	if err != nil {
 		return exitError(err.Error())
 	}
 
+	console.Verbose(opts, "Save report into %q", models.ReportFileName)
+
 	if opts.Config.HTMLOutput || opts.General.HTMLOutput {
-		err = report_maker.MakeHTMLReport(*report)
+		err = reportMaker.MakeHTMLReport(*report)
 		if err != nil {
 			return exitError(err.Error())
 		}
-	}
 
-	console.Verbose(opts, "Save report into %q", models.ReportFileName)
+		console.Verbose(opts, "Save report into %q", models.ReportHTMLFileName)
+	}
 
 	return returnOk
 }
