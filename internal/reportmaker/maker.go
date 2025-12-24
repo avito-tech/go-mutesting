@@ -1,4 +1,4 @@
-package reportMaker
+package reportmaker
 
 import (
 	_ "embed" // for embedding report template
