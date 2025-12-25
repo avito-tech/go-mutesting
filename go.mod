@@ -1,6 +1,6 @@
 module github.com/avito-tech/go-mutesting
 
-go 1.23.6
+go 1.25.5
 
 require (
 	github.com/fatih/color v1.18.0

@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"crypto/md5"
-	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -27,6 +26,7 @@ import (
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/avito-tech/go-mutesting/internal/parser"
+	"github.com/avito-tech/go-mutesting/internal/reportmaker"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
 
@@ -280,33 +280,21 @@ MUTATOR:
 		fmt.Println("Cannot do a mutation testing summary since no exec command was executed.")
 	}
 
-	jsonContent, err := json.Marshal(report)
-	if err != nil {
-		return exitError(err.Error())
-	}
-
-	file, err := os.OpenFile(models.ReportFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		return exitError(err.Error())
-	}
-
-	if file == nil {
-		return exitError("Cannot create file for report")
-	}
-
-	defer func() {
-		err = file.Close()
-		if err != nil {
-			fmt.Printf("Error while report file closing: %v", err.Error())
-		}
-	}()
-
-	_, err = file.WriteString(string(jsonContent))
+	err = reportmaker.MakeJSONReport(*report)
 	if err != nil {
 		return exitError(err.Error())
 	}
 
 	console.Verbose(opts, "Save report into %q", models.ReportFileName)
+
+	if opts.Config.HTMLOutput || opts.General.HTMLOutput {
+		err = reportmaker.MakeHTMLReport(*report)
+		if err != nil {
+			return exitError(err.Error())
+		}
+
+		console.Verbose(opts, "Save report into %q", models.ReportHTMLFileName)
+	}
 
 	return returnOk
 }

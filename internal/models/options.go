@@ -8,6 +8,7 @@ type Options struct {
 		Help                 bool   `long:"help" description:"Show this help message"`
 		Verbose              bool   `long:"verbose" description:"Verbose log output"`
 		Config               string `long:"config" description:"Path to config file"`
+		HTMLOutput           bool   `long:"html-output" description:"Generates a go-mutesting-report.html file after testing is complete"`
 	} `group:"General options"`
 
 	Files struct {
@@ -43,6 +44,7 @@ type Options struct {
 		SkipFileWithoutTest  bool     `yaml:"skip_without_test"`
 		SkipFileWithBuildTag bool     `yaml:"skip_with_build_tags"`
 		JSONOutput           bool     `yaml:"json_output"`
+		HTMLOutput           bool     `yaml:"html_output"`
 		SilentMode           bool     `yaml:"silent_mode"`
 		ExcludeDirs          []string `yaml:"exclude_dirs"`
 	}
