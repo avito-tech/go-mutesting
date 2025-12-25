@@ -25,13 +25,9 @@ var funcMap = template.FuncMap{
 
 // MakeHTMLReport is a function for creating an HTML report based on a stripped-down version of the models.Report model (not all fields are used)
 func MakeHTMLReport(report models.Report) error {
+	// MSI in percent
 	report.Stats.Msi = math.Round(report.Stats.Msi*10_000) / 100
-
-	groupedMutants := make(map[string][]models.Mutant)
-	for _, mutant := range report.Escaped {
-		filePath := mutant.Mutator.OriginalFilePath
-		groupedMutants[filePath] = append(groupedMutants[filePath], mutant)
-	}
+	groupedMutants := groupEscapedMutants(report.Escaped)
 
 	t, err := template.New(models.ReportHTMLFileName).Funcs(funcMap).Parse(reportTmpl)
 	if err != nil {
@@ -93,4 +89,28 @@ func closeReportFile(file *os.File, filename string) {
 	if err := file.Close(); err != nil {
 		fmt.Printf("Error while closing %s: %v\n", filename, err)
 	}
+}
+
+func groupEscapedMutants(escaped []models.Mutant) map[string][]models.Mutant {
+	if len(escaped) == 0 {
+		return make(map[string][]models.Mutant)
+	}
+
+	mutantCount := make(map[string]int)
+	for _, mutant := range escaped {
+		filePath := mutant.Mutator.OriginalFilePath
+		mutantCount[filePath]++
+	}
+
+	groupedMutants := make(map[string][]models.Mutant, len(mutantCount))
+	for filePath, count := range mutantCount {
+		groupedMutants[filePath] = make([]models.Mutant, 0, count)
+	}
+
+	for _, mutant := range escaped {
+		filePath := mutant.Mutator.OriginalFilePath
+		groupedMutants[filePath] = append(groupedMutants[filePath], mutant)
+	}
+
+	return groupedMutants
 }
