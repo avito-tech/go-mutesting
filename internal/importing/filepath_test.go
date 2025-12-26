@@ -30,11 +30,12 @@ func TestFilesOfArgs(t *testing.T) {
 		// directories
 		{
 			[]string{"./filepathfixtures"},
-			[]string{"filepathfixtures/first.go", "filepathfixtures/second.go", "filepathfixtures/third.go"},
+			[]string{"filepathfixtures/fifth.go", "filepathfixtures/first.go", "filepathfixtures/second.go", "filepathfixtures/third.go"},
 		},
 		{
 			[]string{"../importing/filepathfixtures"},
 			[]string{
+				"../importing/filepathfixtures/fifth.go",
 				"../importing/filepathfixtures/first.go",
 				"../importing/filepathfixtures/second.go",
 				"../importing/filepathfixtures/third.go",
@@ -44,6 +45,7 @@ func TestFilesOfArgs(t *testing.T) {
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures"},
 			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
@@ -52,6 +54,7 @@ func TestFilesOfArgs(t *testing.T) {
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
 			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
@@ -87,6 +90,7 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 		{
 			[]string{"./filepathfixtures"},
 			[]Package{{Name: "filepathfixtures", Files: []string{
+				"filepathfixtures/fifth.go",
 				"filepathfixtures/first.go",
 				"filepathfixtures/second.go",
 				"filepathfixtures/third.go",
@@ -95,6 +99,7 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 		{
 			[]string{"../importing/filepathfixtures"},
 			[]Package{{Name: "../importing/filepathfixtures", Files: []string{
+				"../importing/filepathfixtures/fifth.go",
 				"../importing/filepathfixtures/first.go",
 				"../importing/filepathfixtures/second.go",
 				"../importing/filepathfixtures/third.go",
@@ -106,6 +111,7 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 			[]Package{{
 				Name: p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures",
 				Files: []string{
+					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
 					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
@@ -118,6 +124,7 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 				{
 					Name: p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures",
 					Files: []string{
+						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
 						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
@@ -158,12 +165,13 @@ func TestFilesWithSkipWithoutTests(t *testing.T) {
 		// directories
 		{
 			[]string{"./filepathfixtures"},
-			[]string{"filepathfixtures/second.go", "filepathfixtures/third.go"},
+			[]string{"filepathfixtures/fifth.go", "filepathfixtures/second.go", "filepathfixtures/third.go"},
 		},
 		// packages
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
 			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
 			},
@@ -255,6 +263,7 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 		{
 			[]string{"./filepathfixtures/..."},
 			[]string{
+				"filepathfixtures/fifth.go",
 				"filepathfixtures/first.go",
 				"filepathfixtures/second.go",
 				"filepathfixtures/third.go",
@@ -274,6 +283,7 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 		{
 			[]string{"./filepathfixtures"},
 			[]string{
+				"filepathfixtures/fifth.go",
 				"filepathfixtures/first.go",
 				"filepathfixtures/second.go",
 				"filepathfixtures/third.go",
@@ -285,6 +295,7 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
 			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
@@ -295,6 +306,7 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
 			[]string{
+				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
 				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
