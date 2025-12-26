@@ -56,6 +56,11 @@ jobs:
           echo "Looking for coverage files:"
           find . -name "coverage.out" 2>/dev/null || echo "No coverage.out files found"
 
+      - name: Copy coverage file to root
+        run: |
+          cp coverage.out ${{ github.workspace }} || echo "Failed to copy coverage.out"
+          ls -la ${{ github.workspace }}/coverage.out
+
       - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
         uses: tj-actions/coverage-badge-go@v3
         with:
