@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Test
         run: |
-          go test -v $(PKG)/... -covermode=count -coverprofile=coverage.out
+          go test -v github.com/avito-tech/go-mutesting/... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
       - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
