@@ -11,19 +11,22 @@ import (
 
 func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 	tests := []struct {
-		name     string
-		code     string
-		expected bool
+		name              string
+		code              string
+		expectedLiterals  []string
+		expectedOperators []string
 	}{
 		{
-			name:     "skip mutation for slice init with len",
-			code:     `package main; var a = make([]int, 10)`,
-			expected: true,
+			name:              "skip mutation for slice init with len",
+			code:              `package main; var a = make([]int, 10)`,
+			expectedLiterals:  []string{"10"},
+			expectedOperators: []string{},
 		},
 		{
-			name:     "skip mutation for slice init with len and cap",
-			code:     `package main; var a = make([]int, 10, 20)`,
-			expected: true,
+			name:              "skip mutation for slice init with len and cap",
+			code:              `package main; var a = make([]int, 10, 20)`,
+			expectedLiterals:  []string{"10", "20"},
+			expectedOperators: []string{},
 		},
 		{
 			name: "skip mutation for slice init in assigning inside a struct",
@@ -39,22 +42,50 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 				   func fff() { 
 					testCase := &TestCase{ Devices: make([]DeviceStatus, 0) } 
 				   }`,
-			expected: true,
+			expectedLiterals:  []string{"0"},
+			expectedOperators: []string{},
 		},
 		{
-			name:     "skip mutation for map init with cap",
-			code:     `package main; var a = make(map[int]bool, 0)`,
-			expected: true,
+			name:              "skip mutation for map init with cap",
+			code:              `package main; var a = make(map[int]bool, 0)`,
+			expectedLiterals:  []string{"0"},
+			expectedOperators: []string{},
 		},
 		{
-			name:     "do not skip mutation for slice init with variable",
-			code:     `package main; var x = 10; var a = make([]int, x)`,
-			expected: false,
+			name:              "do not skip mutation for slice init with variable",
+			code:              `package main; var x = 10; var a = make([]int, x)`,
+			expectedLiterals:  []string{},
+			expectedOperators: []string{},
 		},
 		{
-			name:     "do not skip mutation for other literals",
-			code:     `package main; var a = 42`,
-			expected: false,
+			name:              "do not skip mutation for other literals",
+			code:              `package main; var a = 42`,
+			expectedLiterals:  []string{},
+			expectedOperators: []string{},
+		},
+		{
+			name:              "skip mutation for slice with type alias",
+			code:              `package main; type Contents []*string; var a = make(Contents, 5)`,
+			expectedLiterals:  []string{"5"},
+			expectedOperators: []string{},
+		},
+		{
+			name:              "skip mutation for complex expression with binary op",
+			code:              `package main; var a = make([]int, 0, len(arr)+1)`,
+			expectedLiterals:  []string{"0", "1"},
+			expectedOperators: []string{"+"},
+		},
+		{
+			name:              "skip mutation for unary operations",
+			code:              `package main; var a = make([]int, -5, +10)`,
+			expectedLiterals:  []string{"5", "10"},
+			expectedOperators: []string{"-", "+"},
+		},
+		{
+			name:              "skip mutation for complex nested expressions",
+			code:              `package main; var a = make([]int, (3), len(arr)+2*4)`,
+			expectedLiterals:  []string{"3", "2", "4"},
+			expectedOperators: []string{"+", "*"},
 		},
 	}
 
@@ -67,20 +98,35 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 			}
 
 			s := NewSkipMakeArgsFilter()
-			s.Collect(node, nil, "")
-			s.ShouldSkip(node, "")
+			s.Collect(node, fs, "")
 
-			var result bool
+			var foundLiterals []string
+			var foundOperators []string
+
 			ast.Inspect(node, func(n ast.Node) bool {
 				if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.INT {
-					_, found := s.IgnoredNodes[lit.Pos()]
-					result = found
-					return false
+					if _, exists := s.IgnoredNodes[lit.Pos()]; exists {
+						foundLiterals = append(foundLiterals, lit.Value)
+					}
 				}
+
+				if binExpr, ok := n.(*ast.BinaryExpr); ok {
+					if _, exists := s.IgnoredNodes[binExpr.OpPos]; exists {
+						foundOperators = append(foundOperators, binExpr.Op.String())
+					}
+				}
+
+				if unaryExpr, ok := n.(*ast.UnaryExpr); ok {
+					if _, exists := s.IgnoredNodes[unaryExpr.OpPos]; exists {
+						foundOperators = append(foundOperators, unaryExpr.Op.String())
+					}
+				}
+
 				return true
 			})
 
-			assert.Equal(t, tt.expected, result)
+			assert.ElementsMatch(t, tt.expectedLiterals, foundLiterals, "Literals mismatch")
+			assert.ElementsMatch(t, tt.expectedOperators, foundOperators, "Operators mismatch")
 		})
 	}
 }

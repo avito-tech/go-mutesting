@@ -2,9 +2,10 @@ package importing
 
 import (
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/models"
 	"os"
 	"testing"
+
+	"github.com/avito-tech/go-mutesting/internal/models"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -190,6 +191,10 @@ func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
 		},
 		{
 			[]string{"./filepathfixtures/third.go"},
+			[]string(nil),
+		},
+		{
+			[]string{"./filepathfixtures/fifth.go"},
 			[]string(nil),
 		},
 		{

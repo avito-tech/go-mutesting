@@ -23,6 +23,11 @@ import (
 	"github.com/avito-tech/go-mutesting/internal/models"
 )
 
+var (
+	buildTagRegex  = regexp.MustCompile(`(?m)^//(go:build|\s*\+build)`)
+	testFileSuffix = "_test.go"
+)
+
 func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map[string]struct{} {
 	var filenames []string
 
@@ -48,10 +53,6 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 
 	fileLookup := make(map[string]struct{})
 	pkgs := make(map[string]map[string]struct{})
-	var re *regexp.Regexp
-	if opts.Config.SkipFileWithBuildTag {
-		re = regexp.MustCompile("\\+build (.*)(\\s+)package") //nolint:gosimple
-	}
 
 	for _, filename := range filenames {
 		if _, ok := fileLookup[filename]; ok {
@@ -72,7 +73,7 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 			}
 		}
 
-		if strings.HasSuffix(filename, "_test.go") { // ignore test files
+		if strings.HasSuffix(filename, testFileSuffix) { // ignore test files
 			continue
 		}
 
@@ -82,13 +83,13 @@ func packagesWithFilesOfArgs(args []string, opts *models.Options) map[string]map
 				continue
 			}
 
-			testName := filename[:nameSize-3] + "_test.go"
+			testName := filename[:nameSize-3] + testFileSuffix
 			if !exists(testName) {
 				continue
 			}
 
 			if opts.Config.SkipFileWithBuildTag { // ignore files with test with build tags
-				isBuildTag := regexpSearchInFile(testName, re)
+				isBuildTag := regexpSearchInFile(testName, buildTagRegex)
 				if isBuildTag {
 					continue
 				}
