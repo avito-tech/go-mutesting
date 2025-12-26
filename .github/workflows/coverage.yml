@@ -7,7 +7,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ github.workspace }}
     name: Update coverage badge
+    defaults:
+      run:
+        working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2
