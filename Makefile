@@ -70,7 +70,7 @@ test-verbose:
 .PHONY: test-verbose
 
 test-verbose-with-coverage:
-	ginkgo -r -v -cover -coverprofile=coverage.out -covermode=count -race -skipPackage="testdata"
+	ginkgo -r -v -cover -coverprofile=coverage.out -covermode=atomic -race -skipPackage="testdata"
 .PHONY: test-verbose-with-coverage
 
 ci-errcheck:
