@@ -25,14 +25,12 @@ func (s *SkipMakeArgsFilter) Collect(file *ast.File, _ *token.FileSet, _ string)
 				arg0 := callExpr.Args[0]
 				_, isArray := arg0.(*ast.ArrayType)
 				_, isMap := arg0.(*ast.MapType)
-				if isArray || isMap {
-					if lit, ok := callExpr.Args[1].(*ast.BasicLit); ok && lit.Kind == token.INT {
-						s.IgnoredNodes[lit.Pos()] = callExpr
-					}
+				_, isIdent := arg0.(*ast.Ident)
+				if isArray || isMap || isIdent {
+					s.collectForIgnoredNodes(callExpr.Args[1], callExpr)
+
 					if len(callExpr.Args) > 2 {
-						if lit, ok := callExpr.Args[2].(*ast.BasicLit); ok && lit.Kind == token.INT {
-							s.IgnoredNodes[lit.Pos()] = callExpr
-						}
+						s.collectForIgnoredNodes(callExpr.Args[2], callExpr)
 					}
 					return false
 				}
@@ -46,4 +44,38 @@ func (s *SkipMakeArgsFilter) Collect(file *ast.File, _ *token.FileSet, _ string)
 func (s *SkipMakeArgsFilter) ShouldSkip(node ast.Node, _ string) bool {
 	_, exists := s.IgnoredNodes[node.Pos()]
 	return exists
+}
+
+// collectForIgnoredNodes recursively collects all numeric literals and unary/binary operators in an expression
+func (s *SkipMakeArgsFilter) collectForIgnoredNodes(expr ast.Expr, callExpr *ast.CallExpr) {
+	switch e := expr.(type) {
+	case *ast.BasicLit:
+		// Direct numeric literal
+		if e.Kind == token.INT {
+			s.IgnoredNodes[e.Pos()] = callExpr
+		}
+	case *ast.BinaryExpr:
+		// Binary operations (addition, subtraction, multiplication, division, etc.)
+		s.IgnoredNodes[e.OpPos] = callExpr
+		s.collectForIgnoredNodes(e.X, callExpr)
+		s.collectForIgnoredNodes(e.Y, callExpr)
+	case *ast.CallExpr:
+		// Calling a function (e.g. len())
+		for _, arg := range e.Args {
+			s.collectForIgnoredNodes(arg, callExpr)
+		}
+	case *ast.ParenExpr:
+		// Expression in brackets
+		s.collectForIgnoredNodes(e.X, callExpr)
+	case *ast.UnaryExpr:
+		// Unary operators (+, -, etc.)
+		if xLit, ok := e.X.(*ast.BasicLit); ok && xLit.Kind == token.INT {
+			// If a unary operator is applied to a numeric literal, both the operator and the literal itself are added.
+			s.IgnoredNodes[e.OpPos] = callExpr
+			s.IgnoredNodes[xLit.Pos()] = callExpr
+		} else {
+			// Otherwise, we continue the tour inside.
+			s.collectForIgnoredNodes(e.X, callExpr)
+		}
+	}
 }
