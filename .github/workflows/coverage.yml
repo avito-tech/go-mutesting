@@ -45,8 +45,7 @@ jobs:
 
       - name: Run Test
         run: |
-          make test-verbose-with-coverage
-          go tool cover -func=coverage.out -o=coverage.out
+          make test-verbose-with-coverage-for-budge
 
       - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
         uses: tj-actions/coverage-badge-go@v3

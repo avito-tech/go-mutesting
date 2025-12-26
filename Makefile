@@ -70,7 +70,12 @@ test-verbose:
 .PHONY: test-verbose
 
 test-verbose-with-coverage:
-	ginkgo -r -v --cover --coverprofile=coverage.out --covermode=atomic --race -skipPackage="testdata"
+	ginkgo -r -v -cover -race -skipPackage="testdata"
+.PHONY: test-verbose-with-coverage
+
+test-verbose-with-coverage-for-budge:
+	go get -t -v $(PKG)/... -covermode=count -coverprofile=coverage.out
+	go tool cover -func=coverage.out -o=coverage.out
 .PHONY: test-verbose-with-coverage
 
 ci-errcheck:
