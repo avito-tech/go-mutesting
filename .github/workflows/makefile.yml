@@ -1,4 +1,4 @@
-name: Makefile for git actions
+name: General CI workflow
 
 on:
   pull_request:
