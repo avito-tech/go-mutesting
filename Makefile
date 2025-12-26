@@ -74,7 +74,7 @@ test-verbose-with-coverage:
 .PHONY: test-verbose-with-coverage
 
 test-verbose-with-coverage-for-budge:
-	go get -t -v $(PKG)/... -covermode=count -coverprofile=coverage.out
+	go test -v $(PKG)/... -covermode=count -coverprofile=coverage.out
 	go tool cover -func=coverage.out -o=coverage.out
 .PHONY: test-verbose-with-coverage
 
