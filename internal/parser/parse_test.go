@@ -17,6 +17,7 @@ func TestParseAndTypeCheckFileTypeCheckWholePackage(t *testing.T) {
 		annotationProcessor,
 		skipFilterProcessor,
 	}
-	_, _, _, _, err := ParseAndTypeCheckFile("../../astutil/create.go", collectors)
+	//_, _, _, _, err := ParseAndTypeCheckFile("../../astutil/create.go", collectors)
+	_, _, _, _, err := ParseAndTypeCheckFile("../../testdata/numbers/decrementer.go", collectors)
 	assert.Nil(t, err)
 }
