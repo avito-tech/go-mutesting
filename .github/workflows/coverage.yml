@@ -9,16 +9,27 @@ jobs:
     runs-on: ubuntu-latest
     name: Update coverage badge
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
-          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
-          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+          go-version: 1.25.5
 
-      - name: Setup go
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@v2
         with:
-          go-version-file: 'go.mod'
+          path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+          persist-credentials: false
+          fetch-depth: 0
+
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#        with:
+#          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+#          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+#
+#      - name: Setup go
+#        uses: actions/setup-go@v4
+#        with:
+#          go-version-file: 'go.mod'
 
       - name: Install dependencies
         run: make install-dependencies
