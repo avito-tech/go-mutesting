@@ -47,6 +47,15 @@ jobs:
         run: |
           make test-verbose-with-coverage-for-budge
 
+      - name: Debug coverage file
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files in directory:"
+          ls -la
+          echo "Looking for coverage files:"
+          find . -name "coverage.out" 2>/dev/null || echo "No coverage.out files found"
+
       - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
         uses: tj-actions/coverage-badge-go@v3
         with:
