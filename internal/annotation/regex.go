@@ -12,8 +12,9 @@ import (
 
 // RegexAnnotation represents a collection of exclusions based on regex pattern matches.
 type RegexAnnotation struct {
-	Exclusions map[int]map[token.Pos]mutatorInfo
-	Name       string
+	GlobalRegexCollector RegexCollector
+	Exclusions           map[int]map[token.Pos]mutatorInfo
+	Name                 string
 }
 
 // parseRegexAnnotation parses a comment line containing a regex annotation.
@@ -46,8 +47,13 @@ func (r *RegexAnnotation) parseRegexAnnotation(comment string) (*regexp.Regexp, 
 // 1. Parsing the regex pattern and mutators from the comment
 // 2. Finding all lines in the file that match the regex
 // 3. Recording nodes from matching lines to be excluded
-func (r *RegexAnnotation) collectMatchNodes(comment *ast.Comment, fset *token.FileSet, file *ast.File, fileAbs string) {
-	regex, mutators := r.parseRegexAnnotation(comment.Text)
+func (r *RegexAnnotation) collectMatchNodes(
+	comment string,
+	fset *token.FileSet,
+	file *ast.File,
+	fileAbs string,
+) {
+	regex, mutators := r.parseRegexAnnotation(comment)
 
 	lines, err := r.findLinesMatchingRegex(fileAbs, regex)
 	if err != nil {

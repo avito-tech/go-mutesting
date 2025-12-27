@@ -205,7 +205,7 @@ MUTATOR:
 	for _, file := range files {
 		console.Verbose(opts, "Mutate %q", file)
 
-		annotationProcessor := annotation.NewProcessor()
+		annotationProcessor := annotation.NewProcessor(annotation.WithGlobalRegexpFilter(opts.Config.ExcludeRegexp...))
 		skipFilterProcessor := filter.NewSkipMakeArgsFilter()
 
 		collectors := []filter.NodeCollector{
