@@ -20,12 +20,12 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/avito-tech/go-mutesting/internal/annotation"
 	"github.com/avito-tech/go-mutesting/internal/console"
 	"github.com/avito-tech/go-mutesting/internal/filter"
 	"github.com/avito-tech/go-mutesting/internal/importing"
 	"github.com/avito-tech/go-mutesting/internal/models"
 	"github.com/avito-tech/go-mutesting/internal/parser"
+	"github.com/avito-tech/go-mutesting/internal/processor/annotation"
 	"github.com/avito-tech/go-mutesting/internal/reportmaker"
 	"github.com/jessevdk/go-flags"
 	"github.com/zimmski/osutil"
@@ -205,7 +205,7 @@ MUTATOR:
 	for _, file := range files {
 		console.Verbose(opts, "Mutate %q", file)
 
-		annotationProcessor := annotation.NewProcessor()
+		annotationProcessor := annotation.NewProcessor(annotation.WithGlobalRegexpFilter(opts.Config.ExcludeRegexp...))
 		skipFilterProcessor := filter.NewSkipMakeArgsFilter()
 
 		collectors := []filter.NodeCollector{

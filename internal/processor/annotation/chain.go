@@ -45,9 +45,15 @@ type NextLineAnnotationCollector struct {
 }
 
 // Handle processes regex pattern annotations, delegating other types to the next handler.
-func (r *RegexAnnotationCollector) Handle(name string, comment *ast.Comment, fset *token.FileSet, file *ast.File, fileAbs string) {
+func (r *RegexAnnotationCollector) Handle(
+	name string,
+	comment *ast.Comment,
+	fset *token.FileSet,
+	file *ast.File,
+	fileAbs string,
+) {
 	if name == RegexpAnnotation {
-		r.Processor.collectMatchNodes(comment, fset, file, fileAbs)
+		r.Processor.collectMatchNodes(comment.Text, fset, file, fileAbs)
 	} else {
 		r.BaseCollector.Handle(name, comment, fset, file, fileAbs)
 	}

@@ -467,3 +467,29 @@ func TestCollect(t *testing.T) {
 	})
 
 }
+
+func TestCollectGlobal(t *testing.T) {
+	filePath := "../../testdata/annotation/global/collect.go"
+
+	fs := token.NewFileSet()
+	file, err := parser.ParseFile(
+		fs,
+		filePath,
+		nil,
+		parser.AllErrors|parser.ParseComments,
+	)
+	assert.NoError(t, err)
+
+	processor := NewProcessor(WithGlobalRegexpFilter("\\.Log *"))
+
+	processor.Collect(file, fs, filePath)
+
+	assert.NotEmpty(t, processor.RegexAnnotation.GlobalRegexCollector.Exclusions)
+	assert.Equal(t, processor.RegexAnnotation.GlobalRegexCollector.Exclusions, map[int]map[token.Pos]mutatorInfo{
+		17: {
+			256: {Names: []string{"*"}},
+			263: {Names: []string{"*"}},
+			267: {Names: []string{"*"}},
+		},
+	})
+}

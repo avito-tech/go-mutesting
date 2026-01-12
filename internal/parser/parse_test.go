@@ -1,11 +1,11 @@
 package parser
 
 import (
+	"github.com/avito-tech/go-mutesting/internal/processor/annotation"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/avito-tech/go-mutesting/internal/annotation"
 	"github.com/avito-tech/go-mutesting/internal/filter"
 )
 
