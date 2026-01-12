@@ -1,7 +1,7 @@
 package statement
 
 import (
-	"github.com/avito-tech/go-mutesting/internal/annotation"
+	"github.com/avito-tech/go-mutesting/internal/processor/annotation"
 	"go/ast"
 	"go/token"
 	"go/types"

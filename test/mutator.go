@@ -3,9 +3,9 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"github.com/avito-tech/go-mutesting/internal/annotation"
 	"github.com/avito-tech/go-mutesting/internal/filter"
 	"github.com/avito-tech/go-mutesting/internal/parser"
+	"github.com/avito-tech/go-mutesting/internal/processor/annotation"
 	"go/printer"
 	"os"
 	"testing"
