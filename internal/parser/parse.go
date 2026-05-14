@@ -53,8 +53,13 @@ func ParseAndTypeCheckFile(file string, collectors []filter.NodeCollector) (*ast
 		return nil, nil, nil, nil, fmt.Errorf("Could not create build package of %q: %v", file, err)
 	}
 
+	typeConf := types.Config{}
+	if sz := types.SizesFor("gc", build.Default.GOARCH); sz != nil {
+		typeConf.Sizes = sz
+	}
 	var conf = loader.Config{
-		ParserMode: parser.AllErrors | parser.ParseComments,
+		ParserMode:  parser.AllErrors | parser.ParseComments,
+		TypeChecker: typeConf,
 	}
 
 	if buildPkg.ImportPath != "." {
