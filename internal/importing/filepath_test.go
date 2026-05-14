@@ -2,7 +2,8 @@ package importing
 
 import (
 	"fmt"
-	"os"
+	"go/build"
+	"path/filepath"
 	"testing"
 
 	"github.com/avito-tech/go-mutesting/internal/models"
@@ -10,8 +11,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// fixtureDir returns the absolute path to filepathfixtures on this machine.
+func fixtureDir(t *testing.T) string {
+	t.Helper()
+	pkg, err := build.Import("github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures", ".", 0)
+	if err != nil {
+		t.Skipf("cannot resolve filepathfixtures: %v", err)
+	}
+	return pkg.Dir
+}
+
+// skipIfNoWildcard skips if wildcard package resolution (which walks $GOPATH/src)
+// returns nothing — this happens in module-mode checkouts that lack a $GOPATH/src layout.
+func skipIfNoWildcard(t *testing.T) {
+	t.Helper()
+	files := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, &models.Options{})
+	if len(files) == 0 {
+		t.Skip("wildcard package resolution requires $GOPATH/src layout; skipping in module mode")
+	}
+}
+
 func TestFilesOfArgs(t *testing.T) {
-	p := os.Getenv("GOPATH") + "/src/"
+	dir := fixtureDir(t)
+	sub := filepath.Join(dir, "secondfixturespackage")
 
 	for _, test := range []struct {
 		args   []string
@@ -41,24 +63,14 @@ func TestFilesOfArgs(t *testing.T) {
 				"../importing/filepathfixtures/third.go",
 			},
 		},
-		// packages
+		// single package (non-wildcard)
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures"},
 			[]string{
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
-			},
-		},
-		{
-			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
-			[]string{
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage/fourth.go",
+				filepath.Join(dir, "fifth.go"),
+				filepath.Join(dir, "first.go"),
+				filepath.Join(dir, "second.go"),
+				filepath.Join(dir, "third.go"),
 			},
 		},
 	} {
@@ -67,10 +79,25 @@ func TestFilesOfArgs(t *testing.T) {
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
+
+	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
+	t.Run("wildcard package", func(t *testing.T) {
+		skipIfNoWildcard(t)
+		var opts = &models.Options{}
+		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
+		assert.Equal(t, []string{
+			filepath.Join(dir, "fifth.go"),
+			filepath.Join(dir, "first.go"),
+			filepath.Join(dir, "second.go"),
+			filepath.Join(dir, "third.go"),
+			filepath.Join(sub, "fourth.go"),
+		}, got)
+	})
 }
 
 func TestPackagesWithFilesOfArgs(t *testing.T) {
-	p := os.Getenv("GOPATH") + "/src/"
+	dir := fixtureDir(t)
+	sub := filepath.Join(dir, "secondfixturespackage")
 
 	for _, test := range []struct {
 		args   []string
@@ -105,38 +132,18 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 				"../importing/filepathfixtures/third.go",
 			}}},
 		},
-		// packages
+		// single package (non-wildcard)
 		{
 			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures"},
 			[]Package{{
-				Name: p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures",
+				Name: dir,
 				Files: []string{
-					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
-					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-					p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
+					filepath.Join(dir, "fifth.go"),
+					filepath.Join(dir, "first.go"),
+					filepath.Join(dir, "second.go"),
+					filepath.Join(dir, "third.go"),
 				},
 			}},
-		},
-		{
-			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
-			[]Package{
-				{
-					Name: p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures",
-					Files: []string{
-						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
-						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
-					},
-				},
-				{
-					Name: p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage",
-					Files: []string{
-						p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage/fourth.go",
-					},
-				},
-			},
 		},
 	} {
 		var opts = &models.Options{}
@@ -144,10 +151,32 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
+
+	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
+	t.Run("wildcard package", func(t *testing.T) {
+		skipIfNoWildcard(t)
+		var opts = &models.Options{}
+		got := PackagesWithFilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
+		assert.Equal(t, []Package{
+			{
+				Name: dir,
+				Files: []string{
+					filepath.Join(dir, "fifth.go"),
+					filepath.Join(dir, "first.go"),
+					filepath.Join(dir, "second.go"),
+					filepath.Join(dir, "third.go"),
+				},
+			},
+			{
+				Name:  sub,
+				Files: []string{filepath.Join(sub, "fourth.go")},
+			},
+		}, got)
+	})
 }
 
 func TestFilesWithSkipWithoutTests(t *testing.T) {
-	p := os.Getenv("GOPATH") + "/src/"
+	dir := fixtureDir(t)
 
 	for _, test := range []struct {
 		args   []string
@@ -167,15 +196,6 @@ func TestFilesWithSkipWithoutTests(t *testing.T) {
 			[]string{"./filepathfixtures"},
 			[]string{"filepathfixtures/fifth.go", "filepathfixtures/second.go", "filepathfixtures/third.go"},
 		},
-		// packages
-		{
-			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
-			[]string{
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
-			},
-		},
 	} {
 		var opts = &models.Options{}
 		opts.Config.SkipFileWithoutTest = true
@@ -183,10 +203,23 @@ func TestFilesWithSkipWithoutTests(t *testing.T) {
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
+
+	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
+	t.Run("wildcard package", func(t *testing.T) {
+		skipIfNoWildcard(t)
+		var opts = &models.Options{}
+		opts.Config.SkipFileWithoutTest = true
+		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
+		assert.Equal(t, []string{
+			filepath.Join(dir, "fifth.go"),
+			filepath.Join(dir, "second.go"),
+			filepath.Join(dir, "third.go"),
+		}, got)
+	})
 }
 
 func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
-	p := os.Getenv("GOPATH") + "/src/"
+	dir := fixtureDir(t)
 
 	for _, test := range []struct {
 		args   []string
@@ -214,13 +247,6 @@ func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
 			[]string{"./filepathfixtures"},
 			[]string{"filepathfixtures/second.go"},
 		},
-		// packages
-		{
-			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
-			[]string{
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-			},
-		},
 	} {
 		var opts = &models.Options{}
 		opts.Config.SkipFileWithBuildTag = true
@@ -228,10 +254,22 @@ func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
+
+	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
+	t.Run("wildcard package", func(t *testing.T) {
+		skipIfNoWildcard(t)
+		var opts = &models.Options{}
+		opts.Config.SkipFileWithBuildTag = true
+		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
+		assert.Equal(t, []string{
+			filepath.Join(dir, "second.go"),
+		}, got)
+	})
 }
 
 func TestFilesWithExcludedDirs(t *testing.T) {
-	p := os.Getenv("GOPATH") + "/src/"
+	dir := fixtureDir(t)
+	sub := filepath.Join(dir, "secondfixturespackage")
 
 	for _, test := range []struct {
 		args   []string
@@ -290,29 +328,6 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 			},
 			[]string(nil),
 		},
-
-		//packages
-		{
-			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
-			[]string{
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage/fourth.go",
-			},
-			[]string{"filepathfixtures"},
-		},
-		{
-			[]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."},
-			[]string{
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/fifth.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/first.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/second.go",
-				p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/third.go",
-			},
-			[]string{p + "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/secondfixturespackage/"},
-		},
 	} {
 		var opts = &models.Options{}
 		opts.Config.ExcludeDirs = test.config
@@ -321,4 +336,32 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 
 		assert.Equal(t, test.expect, got, fmt.Sprintf("With args: %#v", test.args))
 	}
+
+	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
+	t.Run("wildcard package no exclusion", func(t *testing.T) {
+		skipIfNoWildcard(t)
+		var opts = &models.Options{}
+		opts.Config.ExcludeDirs = []string{"filepathfixtures"}
+		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
+		assert.Equal(t, []string{
+			filepath.Join(dir, "fifth.go"),
+			filepath.Join(dir, "first.go"),
+			filepath.Join(dir, "second.go"),
+			filepath.Join(dir, "third.go"),
+			filepath.Join(sub, "fourth.go"),
+		}, got)
+	})
+
+	t.Run("wildcard package exclude subpackage", func(t *testing.T) {
+		skipIfNoWildcard(t)
+		var opts = &models.Options{}
+		opts.Config.ExcludeDirs = []string{sub + "/"}
+		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
+		assert.Equal(t, []string{
+			filepath.Join(dir, "fifth.go"),
+			filepath.Join(dir, "first.go"),
+			filepath.Join(dir, "second.go"),
+			filepath.Join(dir, "third.go"),
+		}, got)
+	})
 }
