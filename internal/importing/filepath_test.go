@@ -3,6 +3,7 @@ package importing
 import (
 	"fmt"
 	"go/build"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -22,13 +23,17 @@ func fixtureDir(t *testing.T) string {
 }
 
 // skipIfNoWildcard skips if wildcard package resolution (which walks $GOPATH/src)
-// returns nothing — this happens in module-mode checkouts that lack a $GOPATH/src layout.
+// is unavailable — this is the case in module-mode checkouts that lack a $GOPATH/src
+// layout. Checks SrcDirs directly to avoid the stderr warning emitted by allPackages.
 func skipIfNoWildcard(t *testing.T) {
 	t.Helper()
-	files := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, &models.Options{})
-	if len(files) == 0 {
-		t.Skip("wildcard package resolution requires $GOPATH/src layout; skipping in module mode")
+	for _, src := range build.Default.SrcDirs() {
+		candidate := filepath.Join(src, "github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures")
+		if _, err := os.Stat(candidate); err == nil {
+			return
+		}
 	}
+	t.Skip("wildcard package resolution requires $GOPATH/src layout; skipping in module mode")
 }
 
 func TestFilesOfArgs(t *testing.T) {
@@ -176,8 +181,6 @@ func TestPackagesWithFilesOfArgs(t *testing.T) {
 }
 
 func TestFilesWithSkipWithoutTests(t *testing.T) {
-	dir := fixtureDir(t)
-
 	for _, test := range []struct {
 		args   []string
 		expect []string
@@ -207,6 +210,7 @@ func TestFilesWithSkipWithoutTests(t *testing.T) {
 	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
 	t.Run("wildcard package", func(t *testing.T) {
 		skipIfNoWildcard(t)
+		dir := fixtureDir(t)
 		var opts = &models.Options{}
 		opts.Config.SkipFileWithoutTest = true
 		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
@@ -219,8 +223,6 @@ func TestFilesWithSkipWithoutTests(t *testing.T) {
 }
 
 func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
-	dir := fixtureDir(t)
-
 	for _, test := range []struct {
 		args   []string
 		expect []string
@@ -258,6 +260,7 @@ func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
 	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
 	t.Run("wildcard package", func(t *testing.T) {
 		skipIfNoWildcard(t)
+		dir := fixtureDir(t)
 		var opts = &models.Options{}
 		opts.Config.SkipFileWithBuildTag = true
 		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
@@ -268,9 +271,6 @@ func TestFilesWithSkipWithBuildTagsTests(t *testing.T) {
 }
 
 func TestFilesWithExcludedDirs(t *testing.T) {
-	dir := fixtureDir(t)
-	sub := filepath.Join(dir, "secondfixturespackage")
-
 	for _, test := range []struct {
 		args   []string
 		expect []string
@@ -340,6 +340,8 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 	// Wildcard package resolution walks $GOPATH/src and is broken in module mode.
 	t.Run("wildcard package no exclusion", func(t *testing.T) {
 		skipIfNoWildcard(t)
+		dir := fixtureDir(t)
+		sub := filepath.Join(dir, "secondfixturespackage")
 		var opts = &models.Options{}
 		opts.Config.ExcludeDirs = []string{"filepathfixtures"}
 		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
@@ -354,6 +356,8 @@ func TestFilesWithExcludedDirs(t *testing.T) {
 
 	t.Run("wildcard package exclude subpackage", func(t *testing.T) {
 		skipIfNoWildcard(t)
+		dir := fixtureDir(t)
+		sub := filepath.Join(dir, "secondfixturespackage")
 		var opts = &models.Options{}
 		opts.Config.ExcludeDirs = []string{sub + "/"}
 		got := FilesOfArgs([]string{"github.com/avito-tech/go-mutesting/internal/importing/filepathfixtures/..."}, opts)
