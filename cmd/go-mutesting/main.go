@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"fmt"
 	"go/ast"
@@ -17,6 +18,7 @@ import (
 	"regexp"
 	"strings"
 	"syscall"
+	"time"
 
 	"gopkg.in/yaml.v3"
 
@@ -191,7 +193,12 @@ MUTATOR:
 
 	tmpDir, err := os.MkdirTemp("", "go-mutesting-")
 	if err != nil {
-		panic(err)
+		return exitError("Could not create tmp dir: %v", err)
+	}
+	if !opts.General.DoNotRemoveTmpFolder {
+		defer func() {
+			_ = os.RemoveAll(tmpDir)
+		}()
 	}
 	console.Verbose(opts, "Save mutations into %q", tmpDir)
 
@@ -225,7 +232,7 @@ MUTATOR:
 
 		err = os.MkdirAll(tmpDir+"/"+filepath.Dir(file), 0755)
 		if err != nil {
-			panic(err)
+			return exitError("Could not create dir for mutation file: %v", err)
 		}
 
 		tmpFile := tmpDir + "/" + file
@@ -233,7 +240,7 @@ MUTATOR:
 		originalFile := fmt.Sprintf("%s.original", tmpFile)
 		err = osutil.CopyFile(file, originalFile)
 		if err != nil {
-			panic(err)
+			return exitError("Could not copy original file %q: %v", file, err)
 		}
 		console.Debug(opts, "Save original into %q", originalFile)
 
@@ -253,14 +260,6 @@ MUTATOR:
 		} else {
 			_ = mutate(opts, mutators, mutationBlackList, mutationID, pkg, info, file, fset, src, src, tmpFile, execs, report, filters)
 		}
-	}
-
-	if !opts.General.DoNotRemoveTmpFolder {
-		err = os.RemoveAll(tmpDir)
-		if err != nil {
-			panic(err)
-		}
-		console.Debug(opts, "Remove %q", tmpDir)
 	}
 
 	report.Calculate()
@@ -515,7 +514,14 @@ func mutateExec(
 
 	console.Debug(opts, "Execute %q for mutation", opts.Exec.Exec)
 
-	execCommand := exec.Command(execs[0], execs[1:]...)
+	timeout := opts.Exec.Timeout
+	if timeout == 0 {
+		timeout = 10
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	execCommand := exec.CommandContext(ctx, execs[0], execs[1:]...)
 
 	execCommand.Stderr = os.Stderr
 	execCommand.Stdout = os.Stdout
@@ -532,21 +538,16 @@ func mutateExec(
 		execCommand.Env = append(execCommand.Env, "TEST_RECURSIVE=true")
 	}
 
-	err := execCommand.Start()
-	if err != nil {
-		panic(err)
-	}
-
-	// TODO timeout here
-
-	err = execCommand.Wait()
+	err := execCommand.Run()
 
 	if err == nil {
 		execExitCode = 0
+	} else if ctx.Err() == context.DeadlineExceeded {
+		execExitCode = 2
 	} else if e, ok := err.(*exec.ExitError); ok {
 		execExitCode = e.Sys().(syscall.WaitStatus).ExitStatus()
 	} else {
-		panic(err)
+		return exitError("Exec command failed unexpectedly: %v", err)
 	}
 
 	return execExitCode
