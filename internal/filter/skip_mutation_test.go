@@ -87,6 +87,32 @@ func TestSkipMutationForInitSlicesAndMaps(t *testing.T) {
 			expectedLiterals:  []string{"3", "2", "4"},
 			expectedOperators: []string{"+", "*"},
 		},
+		{
+			// make(MySlice) with one arg is syntactically valid for the parser even though
+			// the type-checker would reject it; it exercises the len(Args) > 1 guard.
+			name:              "do not skip mutation for single-arg make with type alias",
+			code:              `package main; type MySlice []int; var a = make(MySlice)`,
+			expectedLiterals:  []string{},
+			expectedOperators: []string{},
+		},
+		{
+			name:              "skip mutation for unary negation of complex inner expression",
+			code:              `package main; var a = make([]int, 0, -(2+3))`,
+			expectedLiterals:  []string{"0", "2", "3"},
+			expectedOperators: []string{"+"},
+		},
+		{
+			name:              "skip mutation for nested call with multiple int args",
+			code:              `package main; var a = make([]int, someFunc(2, 3))`,
+			expectedLiterals:  []string{"2", "3"},
+			expectedOperators: []string{},
+		},
+		{
+			name:              "do not skip mutation for unary on float literals",
+			code:              `package main; var a = make([]float64, -1.5, +2.3)`,
+			expectedLiterals:  []string{},
+			expectedOperators: []string{},
+		},
 	}
 
 	for _, tt := range tests {
