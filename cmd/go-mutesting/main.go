@@ -174,7 +174,7 @@ MUTATOR:
 			for _, d := range opts.Mutator.DisableMutators {
 				pattern := strings.HasSuffix(d, "*")
 
-				if (pattern && strings.HasPrefix(name, d[:len(d)-2])) || (!pattern && name == d) {
+				if (pattern && strings.HasPrefix(name, d[:len(d)-1])) || (!pattern && name == d) {
 					continue MUTATOR
 				}
 			}
