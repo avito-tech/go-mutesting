@@ -55,6 +55,9 @@ func ParseAndTypeCheckFile(file string, collectors []filter.NodeCollector) (*ast
 
 	var conf = loader.Config{
 		ParserMode: parser.AllErrors | parser.ParseComments,
+		TypeChecker: types.Config{
+			Sizes: types.SizesFor("gc", build.Default.GOARCH),
+		},
 	}
 
 	if buildPkg.ImportPath != "." {
