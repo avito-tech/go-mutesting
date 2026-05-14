@@ -109,6 +109,22 @@ type mutatorItem struct {
 	Mutator mutator.Mutator
 }
 
+// mutatorDisabled reports whether name matches any entry in patterns.
+// An entry ending in '*' is treated as a prefix: "branch*" disables any
+// mutator whose name starts with "branch".
+func mutatorDisabled(name string, patterns []string) bool {
+	for _, d := range patterns {
+		if strings.HasSuffix(d, "*") {
+			if strings.HasPrefix(name, d[:len(d)-1]) {
+				return true
+			}
+		} else if name == d {
+			return true
+		}
+	}
+	return false
+}
+
 func mainCmd(args []string) int {
 	var opts = &models.Options{}
 	var mutationBlackList = map[string]struct{}{}
@@ -170,14 +186,8 @@ func mainCmd(args []string) int {
 
 MUTATOR:
 	for _, name := range mutator.List() {
-		if len(opts.Mutator.DisableMutators) > 0 {
-			for _, d := range opts.Mutator.DisableMutators {
-				pattern := strings.HasSuffix(d, "*")
-
-				if (pattern && strings.HasPrefix(name, d[:len(d)-2])) || (!pattern && name == d) {
-					continue MUTATOR
-				}
-			}
+		if mutatorDisabled(name, opts.Mutator.DisableMutators) {
+			continue MUTATOR
 		}
 
 		console.Verbose(opts, "Enable mutator %q", name)
