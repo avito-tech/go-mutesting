@@ -22,3 +22,9 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# go-mutesting build output and run artifacts
+/go-mutesting
+report.json
+report.html
+*.go.new

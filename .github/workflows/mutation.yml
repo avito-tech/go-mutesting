@@ -21,9 +21,14 @@ jobs:
         run: go build -o /usr/local/bin/go-mutesting ./cmd/go-mutesting
 
       - name: Run mutation testing
-        # Scoped to packages with isolated unit tests. cmd/ is excluded because
-        # its tests are integration tests that re-invoke the binary. internal/annotation
-        # is excluded until its build errors are resolved.
+        # Scoped to packages with isolated unit tests.
+        # Excluded:
+        #   cmd/               - integration tests re-invoke the binary (would recurse)
+        #   internal/annotation - build errors prevent compilation
+        #   internal/importing  - relies on GOPATH/src layout; fails in module mode
+        #   internal/parser     - uses deprecated go/loader; excluded until migration
+        # The tool always exits 0 regardless of mutation score, so this step is
+        # informational. Check report.json for the full breakdown.
         run: |
           go-mutesting \
             --exec-timeout 30 \
@@ -34,5 +39,3 @@ jobs:
             github.com/avito-tech/go-mutesting/mutator/numbers \
             github.com/avito-tech/go-mutesting/mutator/statement \
             github.com/avito-tech/go-mutesting/internal/filter
-        # Informational only: do not fail the build on mutation score.
-        continue-on-error: true
