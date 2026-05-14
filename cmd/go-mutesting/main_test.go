@@ -167,3 +167,30 @@ func testMain(t *testing.T, root string, exec []string, expectedExitCode int, co
 	assert.Equal(t, expectedExitCode, exitCode)
 	assert.Contains(t, out, contains)
 }
+
+func TestMutatorDisabled(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		patterns []string
+		want     bool
+	}{
+		// exact match
+		{"branch/if", []string{"branch/if"}, true},
+		{"branch/else", []string{"branch/if"}, false},
+		// wildcard prefix
+		{"branch/if", []string{"branch*"}, true},
+		{"branch/else", []string{"branch*"}, true},
+		{"arithmetic/base", []string{"branch*"}, false},
+		// The old bug: len(d)-2 on a 2-char pattern like "b*" produced an empty
+		// prefix "", which matched every mutator name. len(d)-1 correctly gives "b".
+		{"arithmetic/base", []string{"b*"}, false},
+		{"branch/if", []string{"b*"}, true},
+		// empty patterns
+		{"branch/if", []string{}, false},
+		// multiple patterns, first miss second hit
+		{"arithmetic/base", []string{"branch*", "arithmetic*"}, true},
+	} {
+		got := mutatorDisabled(tc.name, tc.patterns)
+		assert.Equal(t, tc.want, got, "mutatorDisabled(%q, %v)", tc.name, tc.patterns)
+	}
+}
