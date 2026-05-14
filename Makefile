@@ -45,7 +45,7 @@ install-tools:
 	go install golang.org/x/tools/cmd/stringer
 
 	# linting
-	go install golang.org/x/lint/golint@latest
+	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/kisielk/errcheck@latest
 
 	# code coverage
