@@ -1,0 +1,38 @@
+name: Mutation Testing
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build go-mutesting
+        run: go build -o /usr/local/bin/go-mutesting ./cmd/go-mutesting
+
+      - name: Run mutation testing
+        # Scoped to packages with isolated unit tests. cmd/ is excluded because
+        # its tests are integration tests that re-invoke the binary. internal/annotation
+        # is excluded until its build errors are resolved.
+        run: |
+          go-mutesting \
+            --exec-timeout 30 \
+            github.com/avito-tech/go-mutesting/mutator/arithmetic \
+            github.com/avito-tech/go-mutesting/mutator/branch \
+            github.com/avito-tech/go-mutesting/mutator/expression \
+            github.com/avito-tech/go-mutesting/mutator/loop \
+            github.com/avito-tech/go-mutesting/mutator/numbers \
+            github.com/avito-tech/go-mutesting/mutator/statement \
+            github.com/avito-tech/go-mutesting/internal/filter
+        # Informational only: do not fail the build on mutation score.
+        continue-on-error: true
