@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"fmt"
 	"go/ast"
@@ -17,6 +18,7 @@ import (
 	"regexp"
 	"strings"
 	"syscall"
+	"time"
 
 	"gopkg.in/yaml.v3"
 
@@ -515,7 +517,10 @@ func mutateExec(
 
 	console.Debug(opts, "Execute %q for mutation", opts.Exec.Exec)
 
-	execCommand := exec.Command(execs[0], execs[1:]...)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(opts.Exec.Timeout)*time.Second)
+	defer cancel()
+
+	execCommand := exec.CommandContext(ctx, execs[0], execs[1:]...)
 
 	execCommand.Stderr = os.Stderr
 	execCommand.Stdout = os.Stdout
@@ -532,17 +537,12 @@ func mutateExec(
 		execCommand.Env = append(execCommand.Env, "TEST_RECURSIVE=true")
 	}
 
-	err := execCommand.Start()
-	if err != nil {
-		panic(err)
-	}
-
-	// TODO timeout here
-
-	err = execCommand.Wait()
+	err := execCommand.Run()
 
 	if err == nil {
 		execExitCode = 0
+	} else if ctx.Err() == context.DeadlineExceeded {
+		execExitCode = 2
 	} else if e, ok := err.(*exec.ExitError); ok {
 		execExitCode = e.Sys().(syscall.WaitStatus).ExitStatus()
 	} else {
