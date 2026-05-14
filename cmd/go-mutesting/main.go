@@ -191,7 +191,7 @@ MUTATOR:
 
 	tmpDir, err := os.MkdirTemp("", "go-mutesting-")
 	if err != nil {
-		panic(err)
+		return exitError("Could not create tmp dir: %v", err)
 	}
 	console.Verbose(opts, "Save mutations into %q", tmpDir)
 
@@ -225,7 +225,7 @@ MUTATOR:
 
 		err = os.MkdirAll(tmpDir+"/"+filepath.Dir(file), 0755)
 		if err != nil {
-			panic(err)
+			return exitError("Could not create dir for mutation file: %v", err)
 		}
 
 		tmpFile := tmpDir + "/" + file
@@ -233,7 +233,7 @@ MUTATOR:
 		originalFile := fmt.Sprintf("%s.original", tmpFile)
 		err = osutil.CopyFile(file, originalFile)
 		if err != nil {
-			panic(err)
+			return exitError("Could not copy original file %q: %v", file, err)
 		}
 		console.Debug(opts, "Save original into %q", originalFile)
 
@@ -258,7 +258,7 @@ MUTATOR:
 	if !opts.General.DoNotRemoveTmpFolder {
 		err = os.RemoveAll(tmpDir)
 		if err != nil {
-			panic(err)
+			return exitError("Could not remove tmp dir %q: %v", tmpDir, err)
 		}
 		console.Debug(opts, "Remove %q", tmpDir)
 	}
@@ -532,21 +532,14 @@ func mutateExec(
 		execCommand.Env = append(execCommand.Env, "TEST_RECURSIVE=true")
 	}
 
-	err := execCommand.Start()
-	if err != nil {
-		panic(err)
-	}
-
-	// TODO timeout here
-
-	err = execCommand.Wait()
+	err := execCommand.Run()
 
 	if err == nil {
 		execExitCode = 0
 	} else if e, ok := err.(*exec.ExitError); ok {
 		execExitCode = e.Sys().(syscall.WaitStatus).ExitStatus()
 	} else {
-		panic(err)
+		return exitError("Exec command failed unexpectedly: %v", err)
 	}
 
 	return execExitCode
