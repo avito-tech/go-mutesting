@@ -425,32 +425,32 @@ func mutateExec(
 	execs []string,
 	mutant *models.Mutant,
 ) (execExitCode int) {
-	if len(execs) == 0 {
-		console.Debug(opts, "Execute built-in exec command for mutation")
-
-		diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
-
-		startLine := parser.FindOriginalStartLine(diff)
-		mutant.Mutator.OriginalStartLine = startLine
-
-		if err == nil {
-			execExitCode = 0
-		} else if e, ok := err.(*exec.ExitError); ok {
-			execExitCode = e.Sys().(syscall.WaitStatus).ExitStatus()
+	execExitCode = 0
+	diff, err := exec.Command("diff", "--label=Original", "--label=New", "-u", file, mutationFile).CombinedOutput()
+	if err != nil {
+		if e, ok := err.(*exec.ExitError); ok {
+			execExitCode = e.ExitCode()
 		} else {
 			panic(err)
 		}
-		if execExitCode != 0 && execExitCode != 1 {
-			fmt.Printf("%s\n", diff)
+	}
 
-			panic("Could not execute diff on mutation file")
-		}
+	if execExitCode != 0 && execExitCode != 1 {
+		fmt.Printf("%s\n", diff)
+		panic("Could not execute diff on mutation file")
+	}
+
+	mutant.Mutator.OriginalStartLine = parser.FindOriginalStartLine(diff)
+	mutant.Diff = string(diff)
+
+	if len(execs) == 0 {
+		console.Debug(opts, "Execute built-in exec command for mutation")
 
 		defer func() {
 			_ = os.Rename(file+".tmp", file)
 		}()
 
-		err = os.Rename(file, file+".tmp")
+		err := os.Rename(file, file+".tmp")
 		if err != nil {
 			panic(err)
 		}
@@ -479,8 +479,6 @@ func mutateExec(
 		if opts.General.Debug {
 			fmt.Printf("%s\n", test)
 		}
-
-		mutant.Diff = string(diff)
 
 		switch execExitCode {
 		case 0: // Tests passed -> FAIL
@@ -532,7 +530,7 @@ func mutateExec(
 		execCommand.Env = append(execCommand.Env, "TEST_RECURSIVE=true")
 	}
 
-	err := execCommand.Start()
+	err = execCommand.Start()
 	if err != nil {
 		panic(err)
 	}
