@@ -139,6 +139,18 @@ The output shows that eight mutations have been found and tested. Six of them pa
 
 The summary also shows the **mutation score** which is a metric on how many mutations are killed by the test suite and therefore states the quality of the test suite. The mutation score is calculated by dividing the number of passed mutations by the number of total mutations, for the example above this would be 6/8=0.75. A score of 1.0 means that all mutations have been killed.
 
+### <a name="filtering-uncovered-code"></a>Filtering untested code
+
+Mutation testing is incredibly powerful, but generating mutants for code that is already known to be untested is slow and generates unnecessary noise. go-mutesting includes a built-in coverage filter to solve this.
+
+You can use the `--covered-only` flag to automatically generate a Go test coverage profile and skip mutating any lines of code that have 0 coverage.
+
+```bash
+go-mutesting --covered-only github.com/avito-tech/go-mutesting/...
+```
+
+This will drastically speed up execution time and ensure that every "Survived" mutant reported is a genuine logic blind spot in a tested function.
+
 ### <a name="black-list-false-positives"></a>Blacklist false positives
 
 Mutation testing can generate many false positives since mutation algorithms do not fully understand the given source code. `early exits` are one common example. They can be implemented as optimizations and will almost always trigger a false-positive since the unoptimized code path will be used which will lead to the same result. go-mutesting is meant to be used as an addition to automatic test suites. It is therefore necessary to mark such mutations as false-positives. This is done with the `--blacklist` argument. The argument defines a file which contains in every line a MD5 checksum of a mutation. These checksums can then be used to ignore mutations.

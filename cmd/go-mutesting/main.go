@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"fmt"
 	"go/ast"
@@ -202,6 +203,41 @@ MUTATOR:
 
 	report := &models.Report{}
 
+	var coverageFilter *filter.CoverageFilter
+	if opts.Filter.CoveredOnly {
+		tmpFile, errTemp := os.CreateTemp("", "go-mutesting-coverage-*.out")
+		if errTemp != nil {
+			return exitError("Cannot create temporary coverage file: %v", errTemp)
+		}
+
+		covPath := tmpFile.Name()
+		_ = tmpFile.Close()
+
+		defer os.Remove(covPath)
+
+		console.Verbose(opts, "Generating temporary coverage profile %q", covPath)
+
+		testArgs := []string{"test", "-coverprofile=" + covPath}
+		testArgs = append(testArgs, opts.Remaining.Targets...)
+
+		cmd := exec.CommandContext(context.Background(), "go", testArgs...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if errRun := cmd.Run(); errRun != nil {
+			console.Verbose(opts, "Warning: go test with coverage returned an error: %v", errRun)
+		}
+
+		cf, errLoad := filter.NewCoverageFilter(covPath)
+		if errLoad != nil {
+			return exitError("Cannot load coverprofile %q: %v", covPath, errLoad)
+		}
+
+		coverageFilter = cf
+
+		console.Verbose(opts, "Loaded coverage profile %q", covPath)
+	}
+
 	for _, file := range files {
 		console.Verbose(opts, "Mutate %q", file)
 
@@ -212,10 +248,16 @@ MUTATOR:
 			annotationProcessor,
 			skipFilterProcessor,
 		}
+		if coverageFilter != nil {
+			collectors = append(collectors, coverageFilter)
+		}
 
 		filters := []filter.NodeFilter{
 			annotationProcessor,
 			skipFilterProcessor,
+		}
+		if coverageFilter != nil {
+			filters = append(filters, coverageFilter)
 		}
 
 		src, fset, pkg, info, err := parser.ParseAndTypeCheckFile(file, collectors)

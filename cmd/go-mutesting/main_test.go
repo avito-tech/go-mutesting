@@ -63,6 +63,18 @@ func TestMainSkipWithoutTest(t *testing.T) {
 	)
 }
 
+func TestMainCoveredOnly(t *testing.T) {
+	t.Parallel()
+
+	testMain(
+		t,
+		"../../example",
+		[]string{"--debug", "--exec-timeout", "1", "--covered-only", "./..."},
+		returnOk,
+		"The mutation score is 1.000000 (0 passed, 0 failed, 0 duplicated, 0 skipped, total is 0)",
+	)
+}
+
 func TestMainJSONReport(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-mutesting-main-test-")
 	assert.NoError(t, err)
