@@ -23,7 +23,8 @@ type Options struct {
 	} `group:"Mutator options"`
 
 	Filter struct {
-		Match string `long:"match" description:"Only functions are mutated that confirm to the arguments regex"`
+		Match       string `description:"Regex to match functions to mutate"                  long:"match"`
+		CoveredOnly bool   `description:"Only mutate covered lines (auto-generates coverage)" long:"covered-only"`
 	} `group:"Filter options"`
 
 	Exec struct {
